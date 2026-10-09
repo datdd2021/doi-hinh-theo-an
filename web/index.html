@@ -549,7 +549,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     .sort((a, b) => D.units[a].cost - D.units[b].cost || D.units[a].name.localeCompare(D.units[b].name, 'vi'));
 
   const sample = ['Ấn Đao Phủ'].map((n) => D.emblems.findIndex((e) => e.name === n)).filter((i) => i >= 0);
-  const state = { picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: 3, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
+  const state = { picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: null, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
   try {
     const saved = JSON.parse(localStorage.getItem('tft-emblems') || 'null');
     if (saved && Array.isArray(saved.picked)) {
@@ -560,10 +560,11 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       if (saved.carry != null && D.units[saved.carry] && !D.units[saved.carry].base) state.carry = saved.carry;
       if (['', 'AD', 'AP'].includes(saved.dmg)) state.dmg = saved.dmg;
       if ('maxUnused' in saved) state.maxUnused = saved.maxUnused;
-      if ('maxUnique' in saved) state.maxUnique = saved.maxUnique;
+      // v2: mặc định 'Bất kỳ' (giới hạn 3 cũ loại mất đội mạnh: tướng 5 vàng hầu hết có tộc/hệ độc nhất)
+      if ('maxUnique' in saved && saved.v === 2) state.maxUnique = saved.maxUnique;
     }
   } catch (e) {}
-  const save = () => { try { localStorage.setItem('tft-emblems', JSON.stringify({ picked: state.picked, locked: state.locked, banned: state.banned, carry: state.carry, dmg: state.dmg, maxUnused: state.maxUnused, maxUnique: state.maxUnique, level: state.level })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem('tft-emblems', JSON.stringify({ v: 2, picked: state.picked, locked: state.locked, banned: state.banned, carry: state.carry, dmg: state.dmg, maxUnused: state.maxUnused, maxUnique: state.maxUnique, level: state.level })); } catch (e) {} };
 
   const sm = M.sources?.stats || M.sources?.seemeta;
   $('pills').innerHTML = `<span>Bản<b>${esc(M.patch || '?')}</b></span><span>Mùa<b>${D.set}</b></span>` + (sm ? `<span title="${esc(sm.name + (sm.patch ? ' · bản ' + sm.patch : ''))}">Số liệu<b>${fmt(sm.matches)} trận</b></span>` : '');
