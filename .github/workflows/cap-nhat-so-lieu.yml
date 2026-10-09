@@ -1,0 +1,32 @@
+# Tự cập nhật số liệu mỗi ngày: tải dữ liệu mới (CommunityDragon, TFT Academy, MetaTFT, seemeta),
+# tính lại thang điểm, chạy bộ kiểm tra. Đạt thì lưu vào kho → Cloudflare Pages tự đưa bản mới lên link.
+# Không đạt thì dừng, link giữ nguyên bản cũ.
+name: Cập nhật số liệu
+on:
+  schedule:
+    - cron: '0 20 * * *'   # 3 giờ sáng giờ Việt Nam
+  workflow_dispatch: {}     # chạy tay ở tab Actions
+permissions:
+  contents: write
+concurrency: cap-nhat
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tải số liệu và tính lại
+        run: node tools/update.mjs
+      - name: Kiểm tra các đội chuẩn (không đạt thì không đưa lên)
+        run: node tools/regress.cjs
+      - name: Lưu bản mới
+        run: |
+          if git diff --quiet -- web; then echo "Không có gì mới"; exit 0; fi
+          git config user.name "cap-nhat-tu-dong"
+          git config user.email "actions@users.noreply.github.com"
+          git add web
+          git commit -m "Cập nhật số liệu $(date -u +%Y-%m-%d)"
+          git push

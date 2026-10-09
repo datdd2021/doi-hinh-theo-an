@@ -1,0 +1,5 @@
+# Cloudflare Pages / Netlify: luôn hỏi lại máy chủ để bạn bè nhận số liệu mới ngay khi có bản mới
+/*
+  Cache-Control: no-cache
+/img/*
+  Cache-Control: public, max-age=604800

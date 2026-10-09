@@ -1,0 +1,1285 @@
+<title>Đội Hình Theo Ấn</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffd84a'/%3E%3Cstop offset='1' stop-color='%23f2a900'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 5.5 55 18.75v26.5L32 58.5 9 45.25v-26.5z' fill='url(%23g)' stroke='url(%23g)' stroke-width='7' stroke-linejoin='round'/%3E%3Cg transform='rotate(-38 32 32)' fill='%2314161a'%3E%3Crect x='22.5' y='10' width='19' height='22' rx='6'/%3E%3Crect x='29' y='30' width='6' height='25' rx='3'/%3E%3C/g%3E%3Cg transform='rotate(-38 32 32)' fill='url(%23g)'%3E%3Crect x='27' y='14.5' width='3.2' height='12.5' rx='1.6'/%3E%3Crect x='33.8' y='14.5' width='3.2' height='12.5' rx='1.6'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Overpass:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Theo bố cục ứng dụng TFT Academy: hàng tier gồm các icon đội (carry chính), bấm vào để mở bảng chi tiết
+   gồm thẻ carry bên trái và đội hình + bàn cờ vị trí bên phải. Màu/font đo từ trang của họ. */
+:root {
+  --bg: #0a0c0d;
+  --bg-2: #0b0d0f;
+  --card: #121417;
+  --card-2: #1a1d21;
+  --cell: #1d2024;
+  --line: #2b2f34;
+  --ink: #ffffff;
+  --dim: #9ba1a8;
+  --yellow: #ffc808;
+  --c1: #acacac; --c2: #22c55e; --c3: #0090ff; --c4: #a855f7; --c5: #eab308;
+  --s1: #fb1737; --s2: #fe3e4b;
+  --a1: #fd551b; --a2: #ff8d1b;
+  --b1: #ffd201; --b2: #f2e82f;
+  --cc1: #16c047; --cc2: #7cf24a;
+  --x1: #0ad2c4; --x2: #12ffdd;
+  --g1: #3b5bdb; --g2: #748ffc;
+  --bp1: #b47a55; --bp3: #a9b7c3; --bp5: #f1c94b; --bp4: #b98ce6;
+  --display: "Anton", "Impact", sans-serif;
+  --heavy: "Archivo Black", "Arial Black", sans-serif;
+  --body: "Overpass", "Segoe UI", system-ui, sans-serif;
+  --hex: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font: 15px/1.4 var(--body); }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; }
+img, svg { display: block; }
+:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.app { display: grid; grid-template-columns: 372px minmax(0, 1fr); align-items: start; min-height: 100vh; }
+
+/* ================= Cột trái ================= */
+.rail { position: sticky; top: 0; height: 100vh; overflow-y: auto; overscroll-behavior: contain; padding: calc(env(safe-area-inset-top, 0px) + 16px) 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid var(--line); background: var(--bg-2); }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.label { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 14px; margin: 0 0 10px; }
+.label button, .sub button { font-size: 12.5px; font-weight: 700; color: var(--dim); }
+.label button:hover, .sub button:hover { color: var(--yellow); }
+.sub { font-size: 12.5px; font-weight: 800; color: var(--dim); margin: 12px 0 8px; display: flex; justify-content: space-between; }
+.slots { display: flex; gap: 8px; }
+.slot { width: 58px; height: 58px; clip-path: var(--hex); background: var(--line); display: grid; place-items: center; position: relative; }
+.slot::before { content: ""; position: absolute; inset: 2px; clip-path: var(--hex); background: var(--bg-2); }
+.slot img { position: absolute; inset: 0; margin: auto; width: 83%; height: 83%; clip-path: var(--hex); object-fit: cover; }
+.slot svg { position: relative; width: 16px; height: 16px; stroke: var(--line); stroke-width: 2.5; fill: none; }
+.slot.on { background: var(--yellow); }
+.slot.on:hover { background: var(--s1); }
+.want-slots .slot { width: 50px; height: 50px; }
+.want-slots .slot img { position: absolute; inset: 0; margin: auto; width: 83%; height: 83%; clip-path: var(--hex); object-fit: cover; }
+.levels { display: flex; gap: 6px; }
+.levels button { flex: 1; height: 32px; border-radius: 999px; border: 1px solid var(--line); font-weight: 800; font-size: 13.5px; color: var(--dim); }
+.levels button:hover { color: var(--ink); }
+.levels button[aria-pressed="true"] { background: var(--yellow); border-color: var(--yellow); color: #111; }
+.carry-row { display: flex; align-items: center; gap: 10px; min-height: 50px; }
+.carry-row .slot { width: 50px; height: 50px; }
+.carry-row .slot img { position: absolute; inset: 0; margin: auto; width: 83%; height: 83%; clip-path: var(--hex); object-fit: cover; }
+.carry-row .hint { font-size: 12px; color: var(--dim); }
+.opts .levels { margin-bottom: 4px; }
+.opts .levels button { height: 28px; font-size: 12.5px; }
+.upick.carry::after { content: ""; position: absolute; top: -2px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--x2); border: 2px solid var(--card); }
+.upick.carry .nm { color: var(--x2); font-weight: 800; }
+.bans { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; align-items: center; }
+.bans .b { width: 32px; height: 32px; clip-path: var(--hex); background: var(--s1); position: relative; }
+.bans .b img { position: absolute; inset: 0; margin: auto; width: 82%; height: 82%; clip-path: var(--hex); object-fit: cover; filter: grayscale(1) brightness(.7); }
+.bans .b::after { content: ""; position: absolute; left: 20%; right: 20%; top: 50%; height: 2px; background: var(--s2); transform: rotate(-35deg); }
+.bans .empty { font-size: 12px; color: var(--dim); }
+.ptabs { display: flex; gap: 18px; border-bottom: 1px solid var(--line); margin: -2px 0 12px; }
+.ptabs button { padding: 0 0 8px; font-weight: 800; font-size: 14px; color: var(--dim); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.ptabs button[aria-selected="true"] { color: var(--yellow); border-color: var(--yellow); }
+.emblems { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px 2px; }
+.emblems .emb .hx { width: 54px; height: 54px; }
+.levels.lv { margin-top: 12px; }
+details.opts summary { cursor: pointer; list-style: none; margin: 0; }
+details.opts summary::after { content: "▾"; color: var(--dim); font-size: 12px; }
+details.opts[open] summary { margin-bottom: 4px; }
+details.opts[open] summary::after { content: "▴"; }
+.side { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.side .rf { margin: 0; }
+.emb { display: grid; justify-items: center; gap: 4px; position: relative; }
+.emb .hx { width: 50px; height: 50px; clip-path: var(--hex); background: var(--line); display: grid; place-items: center; position: relative; }
+.emb .hx::before { content: ""; position: absolute; inset: 2px; clip-path: var(--hex); background: var(--bg-2); }
+.emb .hx img { position: absolute; inset: 0; margin: auto; width: calc(100% - 6px); height: calc(100% - 6px); clip-path: var(--hex); object-fit: cover; }
+.emb .nm { font-size: 11px; line-height: 1.15; color: var(--dim); text-align: center; }
+.emb .tier, .emb .cnt { position: absolute; z-index: 2; top: -3px; min-width: 18px; height: 16px; border-radius: 4px; font: 900 10px/16px var(--body); text-align: center; }
+.emb .tier { right: 4px; color: var(--dim); background: var(--card-2); }
+.emb .tier[data-t^="S"] { background: linear-gradient(0deg, var(--s1), var(--s2)); color: #fff; }
+.emb .tier[data-t="A"] { background: linear-gradient(0deg, var(--a1), var(--a2)); color: #111; }
+.emb .tier[data-t="B"] { background: linear-gradient(0deg, var(--b1), var(--b2)); color: #111; }
+.emb .tier[data-t="C"] { background: linear-gradient(0deg, var(--cc1), var(--cc2)); color: #111; }
+.emb .tier[data-t="D"] { background: var(--card-2); color: var(--s2); }
+.emb.weak:not(.sel) .hx img { opacity: .55; }
+.emb.weak:not(.sel) .nm { color: color-mix(in srgb, var(--dim) 70%, var(--s2)); }
+.emb .cnt { left: 4px; background: var(--yellow); color: #111; }
+.emb:hover .hx { background: var(--dim); }
+.emb.sel .hx { background: var(--yellow); }
+.emb.sel .nm { color: var(--yellow); font-weight: 800; }
+.emb[disabled] { opacity: .35; cursor: default; }
+.mode { display: flex; gap: 6px; margin-bottom: 10px; }
+.mode button { flex: 1; height: 30px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; font-weight: 800; color: var(--dim); }
+.mode button[aria-pressed="true"] { background: var(--yellow); border-color: var(--yellow); color: #111; }
+.mode button.ban[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
+.costs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+.costs button { height: 28px; border-radius: 8px; border: 1px solid var(--line); font-size: 13px; font-weight: 900; color: var(--dim); display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.costs button i { width: 9px; height: 9px; border-radius: 50%; background: var(--c1); }
+.costs button[data-c="2"] i { background: var(--c2); } .costs button[data-c="3"] i { background: var(--c3); }
+.costs button[data-c="4"] i { background: var(--c4); } .costs button[data-c="5"] i { background: var(--c5); }
+.costs button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); background: var(--card-2); }
+.search { width: 100%; height: 34px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 14px var(--body); padding: 0 14px; margin-bottom: 12px; }
+.search::placeholder { color: var(--dim); }
+.ugrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px 2px; }
+.ugrid .upick .hx { width: 52px; height: 52px; }
+.upick { display: grid; justify-items: center; gap: 3px; position: relative; }
+.upick .hx { width: 46px; height: 46px; clip-path: var(--hex); background: var(--c1); position: relative; }
+.upick .hx img { position: absolute; inset: 0; margin: auto; width: 83%; height: 83%; clip-path: var(--hex); object-fit: cover; }
+.upick[data-c="2"] .hx { background: var(--c2); } .upick[data-c="3"] .hx { background: var(--c3); }
+.upick[data-c="4"] .hx { background: var(--c4); } .upick[data-c="5"] .hx { background: var(--c5); }
+.upick .nm { font-size: 10.5px; line-height: 1.1; color: var(--dim); max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upick.sel .nm { color: var(--yellow); font-weight: 800; }
+.upick.sel::after, .upick.ban::after { content: ""; position: absolute; top: -2px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); border: 2px solid var(--card); }
+.upick.ban::after { background: var(--s1); }
+.upick.ban .hx { filter: grayscale(1) brightness(.6); }
+.upick.ban .nm { color: var(--s2); text-decoration: line-through; }
+.upick[disabled] { opacity: .35; cursor: default; }
+.src { font-size: 11.5px; color: var(--dim); line-height: 1.5; padding: 0 4px; }
+.src a { color: var(--dim); }
+
+/* --- Cột trái: kiểu trang tra cứu, phẳng, ít thẻ bo tròn --- */
+.rail { gap: 0; padding: calc(env(safe-area-inset-top, 0px) + 6px) 0 0; }
+.rail .panel { background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 14px 16px; }
+.rail .label { font-size: 11.5px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.rail .label button, .rail .sub button { text-transform: none; letter-spacing: 0; font-weight: 700; }
+.rail .sub { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+#slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+#slots .slot { width: 100%; height: auto; aspect-ratio: 1 / 1.07; }
+#slots .slot img { width: 86%; height: 86%; }
+#slots .slot svg { width: 20px; height: 20px; }
+/* nhóm nút liền khối */
+.rail .levels, .rail .mode, .ptabs { display: flex; gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg); }
+.rail .levels button, .rail .mode button, .ptabs button { flex: 1; height: 32px; border: 0; border-radius: 0; margin: 0; padding: 0; font-size: 13px; font-weight: 800; color: var(--dim); background: none; }
+.rail .levels button + button, .rail .mode button + button, .ptabs button + button { border-left: 1px solid var(--line); }
+.rail .levels button:hover, .rail .mode button:hover, .ptabs button:hover { color: var(--ink); background: var(--card); }
+.rail .levels button[aria-pressed="true"], .rail .mode button[aria-pressed="true"] { background: var(--yellow); color: #111; }
+.rail .mode button.ban[aria-pressed="true"] { background: var(--s1); color: #fff; }
+.ptabs { margin: 0 0 12px; }
+.ptabs button { height: 36px; font-size: 14px; }
+.ptabs button[aria-selected="true"] { background: var(--yellow); color: #111; }
+.levels.lv { margin-top: 12px; }
+.rail .opts .levels button { height: 30px; font-size: 12.5px; }
+.rail .costs { gap: 4px; }
+.rail .costs button { height: 28px; border-radius: 4px; }
+.rail .search { border-radius: 6px; }
+.rail details.opts { border-bottom: 0; }
+.rail .src { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--bg-2); }
+
+/* ================= Cột phải ================= */
+.main { min-width: 0; padding: calc(env(safe-area-inset-top, 0px) + 16px) 24px 40px; }
+.wrap { max-width: 1180px; }
+/* Màn hình rộng: lộ trình + đập ấn sang cột phải, ít phải cuộn */
+@media (min-width: 1500px) {
+  .wrap { max-width: 1640px; display: grid; grid-template-columns: minmax(0, 1fr) 420px; column-gap: 16px; align-items: start; }
+  .wrap > :not(.side) { grid-column: 1; }
+  .side { grid-column: 2; grid-row: 1 / span 20; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+}
+.side .path .step { grid-template-columns: 64px minmax(0, 1fr) auto; }
+.side .path .pu { width: 34px; height: 36px; }
+.pills { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; font-size: 13.5px; }
+.pills span { padding: 5px 14px; color: var(--dim); }
+.pills span + span { border-left: 1px solid var(--line); }
+.pills b { color: var(--ink); margin-left: 6px; }
+.headline { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; font: 400 clamp(30px, 3.4vw, 46px)/1 var(--display); text-transform: uppercase; }
+.headline .y { color: var(--yellow); }
+.headline svg { width: 20px; height: 20px; fill: var(--yellow); }
+
+/* --- Hàng tier: mỗi đội là một icon lục giác --- */
+.tiers { display: grid; gap: 10px; }
+.trow { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; --tc: var(--g2); }
+.trow[data-t="S"] { --tc: var(--s2); --t1: var(--s1); --t2: var(--s2); }
+.trow[data-t="A"] { --tc: var(--a2); --t1: var(--a1); --t2: var(--a2); }
+.trow[data-t="B"] { --tc: var(--b2); --t1: var(--b1); --t2: var(--b2); }
+.trow[data-t="C"] { --tc: var(--cc2); --t1: var(--cc1); --t2: var(--cc2); }
+.trow[data-t="X"] { --tc: var(--x2); --t1: var(--x1); --t2: var(--x2); }
+.trow[data-t="G"] { --tc: var(--g2); --t1: var(--g1); --t2: var(--g2); }
+.tblock { position: relative; min-height: 104px; display: grid; place-items: center; align-content: center; background: linear-gradient(0deg, var(--t1, var(--g1)), var(--t2, var(--g2))); }
+.tblock b { font: 400 66px/0.85 var(--heavy); color: rgba(0, 0, 0, .62); }
+.tblock small { font-size: 11px; font-weight: 900; color: rgba(0, 0, 0, .55); text-transform: uppercase; margin-top: 6px; }
+.tblock::before, .tblock::after { content: ""; position: absolute; width: 10px; height: 10px; border: 2.5px solid rgba(0, 0, 0, .6); }
+.tblock::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; }
+.tblock::after { bottom: 6px; right: 6px; border-left: 0; border-top: 0; }
+.trow[data-t="G"] .tblock b { font: 400 30px/1 var(--display); text-transform: uppercase; }
+.tbox { contain: layout; position: relative; border: 2px solid var(--tc); border-radius: 18px; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; background: var(--bg-2); }
+.tbox .flag { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--tc); color: #111; font-size: 11.5px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; padding: 3px 14px; border-radius: 999px; }
+.cicon { position: relative; width: 74px; height: 74px; }
+.cicon .ring { position: absolute; inset: 0; clip-path: var(--hex); background: var(--c1); transition: transform .12s; }
+.cicon .ring img { position: absolute; inset: 0; margin: auto; width: 84%; height: 84%; clip-path: var(--hex); object-fit: cover; }
+.cicon[data-c="2"] .ring { background: var(--c2); } .cicon[data-c="3"] .ring { background: var(--c3); }
+.cicon[data-c="4"] .ring { background: var(--c4); } .cicon[data-c="5"] .ring { background: var(--c5); }
+.cicon .tl { position: absolute; z-index: 2; top: 4px; left: 4px; width: 20px; height: 20px; display: grid; place-items: center; font: 900 12px/1 var(--body); color: #111; background: linear-gradient(0deg, var(--l1, var(--g1)), var(--l2, var(--g2))); clip-path: var(--hex); }
+.cicon .tl[data-t="S"] { --l1: var(--s1); --l2: var(--s2); color: #fff; } .cicon .tl[data-t="A"] { --l1: var(--a1); --l2: var(--a2); }
+.cicon .tl[data-t="B"] { --l1: var(--b1); --l2: var(--b2); } .cicon .tl[data-t="C"] { --l1: var(--cc1); --l2: var(--cc2); }
+.cicon .tl[data-t="D"], .cicon .tl[data-t="X"] { --l1: var(--x1); --l2: var(--x2); }
+.cicon .bd { position: absolute; z-index: 2; bottom: -2px; left: 50%; transform: translateX(-50%); width: 24px; height: 26px; clip-path: var(--hex); background: var(--bg); display: grid; place-items: center; }
+.cicon .bd::before { content: ""; position: absolute; inset: 2px; clip-path: var(--hex); background: var(--card-2); }
+.cicon .bd img { position: relative; width: 15px; height: 15px; }
+.cicon .bd img.e { position: absolute; inset: 0; margin: auto; width: calc(100% - 4px); height: calc(100% - 4px); clip-path: var(--hex); object-fit: cover; }
+.cicon:hover .ring { transform: scale(1.05); }
+.cicon[aria-pressed="true"]::after { content: ""; position: absolute; inset: -5px; clip-path: var(--hex); background: var(--tc); z-index: -1; }
+.cicon[aria-pressed="true"] { z-index: 0; filter: drop-shadow(0 0 12px color-mix(in srgb, var(--tc) 55%, transparent)); }
+
+/* --- Bảng chi tiết --- */
+.detail { margin-top: 18px; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 14px; align-items: start; }
+.hero { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--tc); padding: 22px 18px 18px; display: grid; justify-items: center; gap: 10px; text-align: center;
+  background: radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--tc) 32%, transparent), transparent 70%), var(--card); }
+.hero .wm { position: absolute; top: -18px; left: -8px; font: 400 230px/1 var(--heavy); color: color-mix(in srgb, var(--tc) 14%, transparent); pointer-events: none; }
+.hero .big { position: relative; width: 132px; height: 132px; }
+.hero .big .ring { position: absolute; inset: 0; clip-path: var(--hex); background: var(--tc); }
+.hero .big .ring img { position: absolute; inset: 0; margin: auto; width: 86%; height: 86%; clip-path: var(--hex); object-fit: cover; }
+.hero .big .em { position: absolute; z-index: 2; left: 2px; top: 34px; width: 34px; height: 37px; clip-path: var(--hex); background: var(--bg); display: grid; place-items: center; }
+.hero .big .em img { width: calc(100% - 4px); height: calc(100% - 4px); clip-path: var(--hex); object-fit: cover; }
+.hero h2 { position: relative; margin: 4px 0 0; font: 900 22px/1.1 var(--body); text-transform: uppercase; }
+.hero .style { position: relative; font-size: 13px; font-weight: 900; color: var(--tc); text-transform: uppercase; letter-spacing: .02em; }
+.hero h4 { position: relative; margin: 8px 0 2px; font-size: 14px; font-weight: 900; }
+/* Huy hiệu tộc/hệ kiểu TFT Academy: nền màu theo mốc (đồng/bạc/vàng/cầu vồng), icon + số màu đen */
+.traits { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.trait { display: inline-flex; align-items: center; justify-content: center; gap: 2px; height: 24px; min-width: 44px; padding: 0 4px; border-radius: 4px; color: #000; font: 700 16px/1 var(--body); font-variant-numeric: tabular-nums; }
+.trait img { width: 20px; height: 20px; filter: brightness(0); }
+button.trait { border: 0; cursor: pointer; }
+button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+/* Gợi ý đập ấn */
+.rf { margin: 0 0 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.rf .hd { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 14px; }
+.rf .hd small { font-weight: 600; color: var(--dim); font-size: 12px; }
+.rf .pg { height: 4px; background: var(--card-2); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.rf .pg i { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .2s; }
+.rf .list { display: grid; gap: 6px; margin-top: 10px; }
+.rf .it { display: grid; grid-template-columns: 30px 64px minmax(0, 1fr); align-items: center; gap: 8px; font-size: 12.5px; }
+.rf .it img { width: 30px; height: 33px; clip-path: var(--hex); object-fit: cover; }
+.rf .v { justify-self: start; font-weight: 900; font-size: 11.5px; padding: 3px 8px; border-radius: 999px; background: var(--card-2); color: var(--dim); }
+.rf .it.go .v { background: var(--s2); color: #fff; }
+.rf .it.keep .v { background: color-mix(in srgb, var(--cc2) 22%, var(--card-2)); color: var(--cc2); }
+.rf .tx { color: var(--dim); line-height: 1.35; }
+.rf .tx b { color: var(--ink); }
+.path { margin: 14px 0 0; }
+.path .psub { margin: 4px 0 0; font-size: 12px; color: var(--dim); }
+.path .tabs em.rec { font-style: normal; font-size: 10.5px; font-weight: 900; margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--cc2); color: #111; }
+.path .step.main { outline: 1.5px solid var(--yellow); }
+.path .lv .tl { display: inline-grid; place-items: center; width: 20px; height: 22px; clip-path: var(--hex); font-size: 11px; font-weight: 900; color: #111; margin: 3px 6px 0 0; vertical-align: middle; background: var(--cc2); }
+.path .lv .tl[data-t="S"] { background: var(--s2); color: #fff; } .path .lv .tl[data-t="A"] { background: var(--a2); } .path .lv .tl[data-t="B"] { background: var(--b2); }
+.path .lv small { display: inline; }
+.side .path .step { grid-template-columns: 96px minmax(0, 1fr) auto; }
+.path .lv b { font-size: 13px; line-height: 1.2; }
+.path .tabs { display: flex; gap: 6px; margin: 8px 0 10px; flex-wrap: wrap; }
+.path .tabs button { height: 28px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); font-size: 12.5px; font-weight: 800; }
+.path .tabs button[aria-selected="true"] { background: var(--yellow); border-color: var(--yellow); color: #111; }
+.path .steps { display: grid; gap: 8px; }
+.path .step { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; align-items: center; gap: 10px; background: var(--card-2); border-radius: 12px; padding: 8px 10px; }
+.path .lv b { display: block; font-size: 15px; font-weight: 900; }
+.path .lv small { font-size: 11.5px; color: var(--dim); }
+.path .us { display: flex; flex-wrap: wrap; gap: 4px; }
+.path .pu { position: relative; width: 38px; height: 40px; clip-path: var(--hex); background: var(--c1); display: grid; place-items: center; }
+.path .pu img { width: 86%; height: 86%; clip-path: var(--hex); object-fit: cover; }
+.path .pu[data-c="2"] { background: var(--c2); } .path .pu[data-c="3"] { background: var(--c3); } .path .pu[data-c="4"] { background: var(--c4); } .path .pu[data-c="5"] { background: var(--c5); }
+.path .pu.new { background: var(--yellow); }
+.path .pu.new::after { content: "+"; position: absolute; top: 1px; left: 50%; transform: translateX(-50%); font: 900 12px/1 var(--body); color: #111; text-shadow: 0 0 2px #fff; }
+.path .note { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.path .nt { display: inline-flex; align-items: center; gap: 3px; }
+.path .nt > i { font-style: normal; font-size: 11px; font-weight: 800; color: var(--dim); margin-right: 3px; }
+.path .pu.sm { width: 24px; height: 26px; }
+.path .pu.sold img { filter: grayscale(1) brightness(.55); }
+.path .pu.sold::after { content: ""; position: absolute; left: 18%; right: 18%; top: 50%; height: 2px; background: var(--s2); transform: rotate(-35deg); }
+.path .mv { display: inline-flex; align-items: center; gap: 1px; margin-right: 4px; }
+.path .mv > img { width: 20px; height: 20px; clip-path: var(--hex); opacity: 1 !important; }
+.path .hold { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 8px 10px; border-radius: 10px; background: var(--card-2); }
+.path .hold b { font-size: 12.5px; white-space: nowrap; }
+.path .hold .us { display: flex; flex-wrap: wrap; gap: 4px; }
+.path .copy { height: 26px; font-size: 12px; }
+@media (max-width: 600px) { .path .step { grid-template-columns: 1fr auto; } .path .us { grid-column: 1 / -1; grid-row: 2; } .path .note { grid-column: 1 / -1; } }
+.rf .more { margin-top: 8px; font-size: 12px; color: var(--dim); }
+.rf .more summary { cursor: pointer; font-weight: 800; }
+.rf .more ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.rf .more b { color: var(--ink); }
+.tpop { position: fixed; z-index: 60; width: 288px; max-width: calc(100vw - 16px); background: #121417; border: 2px solid #34383c; border-radius: 12px; padding: 12px; color: #fff; text-align: left; box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+.utip { position: fixed; z-index: 70; width: 260px; max-width: calc(100vw - 16px); background: #121417; border: 2px solid #34383c; border-radius: 12px; padding: 10px 12px; color: #fff; box-shadow: 0 12px 32px rgba(0,0,0,.55); pointer-events: none; font-size: 12.5px; }
+.utip .h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.utip .h b { font: 900 16px/22px var(--body); }
+.utip .h small { font-size: 11px; font-weight: 800; color: #c9c9c9; background: #2a2d31; border-radius: 6px; padding: 2px 7px; white-space: nowrap; }
+.utip .sub { color: #a5a7ab; margin: 2px 0 8px; font-size: 11.5px; }
+.utip .tr { display: flex; align-items: center; gap: 7px; padding: 2px 0; }
+.utip .tr img { width: 18px; height: 18px; }
+.utip .tr span { flex: 1; font-weight: 700; }
+.utip .tr em { font-style: normal; font-weight: 900; color: #a5a7ab; }
+.utip .tr.on em { color: var(--yellow); }
+.utip .bp { display: flex; gap: 4px; margin: 6px 0 2px; flex-wrap: wrap; }
+.utip .bp i { font-style: normal; font-weight: 900; font-size: 11.5px; padding: 1px 7px; border-radius: 6px; background: #2a2d31; color: #a5a7ab; }
+.utip .bp i.on { background: var(--yellow); color: #111; }
+.utip .ft { margin-top: 8px; padding-top: 7px; border-top: 1px solid #2a2d31; color: #c9c9c9; }
+.tpop .hd { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.tpop .hd img { width: 48px; height: 48px; flex: none; }
+.tpop .hd b { font: 900 18px/28px var(--body); }
+.tpop .ds { font-size: 12px; line-height: 16px; opacity: .7; white-space: pre-line; }
+.tpop .ds .in { display: block; margin-bottom: 4px; }
+.tpop .ds .r { display: block; opacity: .3; }
+.tpop .ds .r.on { opacity: 1; font-weight: 800; }
+.tpop .us { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 8px; }
+.tpop .us img { width: 34px; height: 36px; object-fit: cover; border: 2px solid var(--c1); border-radius: 4px; }
+.tpop .us img[data-c="2"] { border-color: var(--c2); } .tpop .us img[data-c="3"] { border-color: var(--c3); }
+.tpop .us img[data-c="4"] { border-color: var(--c4); } .tpop .us img[data-c="5"] { border-color: var(--c5); }
+.trait span { padding-top: 2px; }
+.trait[data-s="1"] { background: radial-gradient(circle at 0 0, #7b472c, transparent 70%), radial-gradient(circle at 100% 100%, #79462b, transparent 70%), #93563a; }
+.trait[data-s="3"] { background: radial-gradient(circle at 0 0, #a9adb6, transparent 70%), radial-gradient(circle at 100% 100%, #acb0b8, transparent 70%), #7d828f; }
+.trait[data-s="5"] { background: radial-gradient(circle at 0 0, #fad28f, transparent 70%), radial-gradient(circle at 100% 100%, #fbd596, transparent 70%), #f6a61e; }
+.trait[data-s="6"] { background: linear-gradient(135deg, #8ff0e6, #e7a6f0 50%, #f6e08b); }
+.trait[data-s="4"] { background: radial-gradient(circle at 0 0, #f7883a, transparent 70%), radial-gradient(circle at 100% 100%, #f7883a, transparent 70%), #f45c05; }
+/* Mốc chưa kích và tộc/hệ độc nhất: xám */
+.trait.off { background: #2a2d31; color: #8b9096; }
+.trait.off img { filter: brightness(0) invert(.58); }
+.trait small { font-size: .78em; font-weight: 700; opacity: .8; }
+@media (max-width: 1023px) {
+  .traits { gap: 4px; }
+  .trait { height: 18px; gap: 1px; font-size: 13px; }
+  .trait img { width: 16px; height: 16px; }
+}
+.holders { position: relative; display: grid; gap: 6px; width: 100%; }
+.holder { display: grid; grid-template-columns: 26px 18px 34px minmax(0, 1fr); align-items: center; gap: 6px; background: var(--card-2); border-radius: 10px; padding: 6px 10px; text-align: left; }
+.holder .ei { width: 26px; height: 29px; clip-path: var(--hex); object-fit: cover; }
+.holder svg { width: 14px; height: 14px; fill: var(--dim); }
+.holder .hp { width: 34px; height: 34px; clip-path: var(--hex); object-fit: cover; }
+.holder b { font-size: 13px; display: block; }
+.holder small { font-size: 11.5px; color: var(--dim); }
+.holder.bad b { color: var(--a2); }
+.srcline { position: relative; font-size: 12.5px; color: var(--dim); }
+.srcline b { color: var(--ink); }
+
+.right { display: grid; gap: 12px; min-width: 0; }
+.rhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctab { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px 0 6px; border-radius: 9px 9px 0 0; background: var(--card); border: 1px solid var(--line); border-bottom: 0; font-size: 14px; font-weight: 900; }
+.ctab .tl { width: 18px; height: 18px; clip-path: var(--hex); background: linear-gradient(0deg, var(--t1, var(--g1)), var(--t2, var(--g2))); display: grid; place-items: center; font-size: 10px; color: #111; }
+.chip { font-size: 12.5px; font-weight: 700; color: var(--dim); background: var(--card-2); border-radius: 999px; padding: 4px 11px; }
+.chip.warn { color: var(--a2); }
+.chip.score b { font-size: 14px; color: var(--ink, #fff); }
+.chip.score[data-t="S"] b { color: var(--s2); } .chip.score[data-t="A"] b { color: var(--a2); } .chip.score[data-t="B"] b { color: var(--b2); } .chip.score[data-t="C"] b { color: var(--cc2); }
+.chip.test { color: var(--x2); }
+.acts { margin-left: auto; display: flex; gap: 6px; }
+.pill { height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 800; background: var(--card); border: 1px solid var(--line); text-decoration: none; }
+.pill svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pill:hover { border-color: var(--ink); }
+.pill.y { background: var(--yellow); border-color: var(--yellow); color: #111; }
+.pill.y.ok { background: var(--cc2); border-color: var(--cc2); }
+.code { flex-basis: 100%; font: 11px ui-monospace, Consolas, monospace; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
+.box { contain: layout paint; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; overflow-x: auto; }
+.box h4 { margin: 0 0 12px; text-align: center; font-size: 14.5px; font-weight: 900; }
+.board { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 8px; }
+.u { position: relative; width: 70px; height: 78px; }
+.u .ring { position: absolute; top: 0; left: 0; width: 70px; height: 70px; clip-path: var(--hex); background: var(--c1); }
+.u .ring img { position: absolute; inset: 0; margin: auto; width: 84%; height: 84%; clip-path: var(--hex); object-fit: cover; }
+.u[data-c="2"] .ring { background: var(--c2); } .u[data-c="3"] .ring { background: var(--c3); }
+.u[data-c="4"] .ring { background: var(--c4); } .u[data-c="5"] .ring { background: var(--c5); }
+.u .nm { position: absolute; z-index: 1; top: 44px; left: 0; width: 70px; text-align: center; font-size: 11px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 9px; text-shadow: 0 0 3px #000, 0 0 3px #000, 0 1px 2px #000; }
+.u .st { position: absolute; z-index: 2; top: -1px; left: 0; width: 70px; display: flex; justify-content: center; gap: 1px; }
+.u .st svg { width: 11px; height: 11px; fill: var(--yellow); stroke: #000; stroke-width: 2.5; paint-order: stroke; }
+.u .its { position: absolute; z-index: 2; left: 0; width: 70px; top: 56px; display: flex; justify-content: center; gap: 0; }
+.u .its img { width: 20px; height: 20px; clip-path: var(--hex); background: #000; margin: 0 -1px; }
+.u .its img.mine { background: var(--yellow); padding: 1.5px; }
+.u .vt { position: absolute; z-index: 2; top: 12px; right: 9px; width: 19px; height: 19px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #26262e, #0b0b0f 75%); box-shadow: 0 0 0 1.5px var(--bp5), 0 1px 4px rgba(0, 0, 0, .7); display: grid; place-items: center; }
+.u .vt img { width: 64%; height: 64%; object-fit: contain; }
+.u .w2 { position: absolute; z-index: 2; top: 10px; left: 0; font-size: 9px; font-weight: 900; background: var(--yellow); color: #111; border-radius: 3px; padding: 0 3px; }
+.u.want .nm { color: var(--yellow); }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+#boardbox { container-type: inline-size; padding: 12px 8px 10px; overflow: hidden; }
+.hexboard { --gap: 5px; --w: min(112px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5)); --h: calc(var(--w) * 1.05); --fs: max(9px, calc(var(--w) * .16)); --it: calc(var(--w) * .26); width: max-content; margin: 0 auto; padding: 4px 0 calc(var(--h) * .25 + 2px); }
+.zoom-in { container-type: inline-size; width: min(96vw, 1240px); }
+.hexboard.big { --gap: 7px; --w: min(160px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5), calc((100vh - 170px) / 3.45)); }
+.zoom-in { overflow: hidden; }
+.hexboard .c .u .vt { top: calc(var(--h) * .15); right: calc(var(--w) * .12); width: calc(var(--w) * .3); height: calc(var(--w) * .3); }
+@container (max-width: 430px) { .hexboard .c .u .nm { display: none; } }
+.hexboard .r { display: flex; gap: var(--gap); height: calc(var(--h) * .75 + 6px); }
+.hexboard .r:nth-child(even) { margin-left: calc((var(--w) + var(--gap)) / 2); }
+.hexboard .c { position: relative; width: var(--w); height: var(--h); clip-path: var(--hex); background: var(--cell); }
+.hexboard .c .u { position: absolute; inset: 0; width: var(--w); height: var(--h); }
+.hexboard .c .u .ring { width: var(--w); height: var(--h); }
+.hexboard .c .u .nm { top: calc(var(--h) * .52); width: var(--w); font-size: var(--fs); }
+.hexboard .c .u .its { top: calc(var(--h) * .7); width: var(--w); } .hexboard .c .u .its img { width: var(--it); height: var(--it); }
+.zoom { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, .78); display: grid; place-items: center; padding: 20px; }
+.zoom-in { max-width: 100%; max-height: 100%; overflow: auto; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 20px 20px; }
+.zoom-h { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.zoom-h h4 { margin: 0; font-size: 16px; font-weight: 900; flex: 1; }
+.zoom-h .reset { position: static; }
+.hexboard .c .u, .board .u { cursor: grab; touch-action: none; user-select: none; }
+.hexboard .c.over { background: color-mix(in srgb, var(--yellow) 35%, var(--cell)); }
+.drag-ghost { position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; opacity: .92; will-change: transform; margin: 0 !important; padding: 0 !important; transition: none !important; }
+.drag-ghost .c { background: transparent !important; }
+.u.dragging { opacity: .35; }
+.boxh { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 12px; position: relative; }
+.boxh h4 { margin: 0 !important; }
+.reset { position: absolute; right: 0; font-size: 12px; font-weight: 800; color: var(--dim); }
+.reset:hover { color: var(--yellow); }
+.zbtn { position: absolute; left: 0; height: 26px; font-size: 12px; }
+.boxh .reset { right: 0; }
+.alts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; }
+.alt { display: flex; align-items: center; gap: 6px; justify-content: center; font-size: 12px; color: var(--dim); }
+.alt img { width: 34px; height: 34px; clip-path: var(--hex); object-fit: cover; }
+.alt svg { width: 12px; height: 12px; fill: var(--dim); }
+.loading { display: flex; align-items: center; gap: 12px; color: var(--dim); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; font-weight: 700; }
+.loading i { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid var(--line); border-top-color: var(--yellow); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.none { color: var(--dim); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.bar { height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; margin: 12px 0; }
+.bar i { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .15s; }
+
+/* ================= Điện thoại ================= */
+.mbar { display: none; }
+
+@media (max-width: 900px) {
+  .app { display: block; }
+  .main { padding: 0 16px 32px; }
+  .mbar { display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 5; margin: 0 -16px 12px; padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .mbar .mini { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-size: 13px; color: var(--dim); }
+  .mbar .mini img { width: 28px; height: 28px; }
+  .rail { position: fixed; inset: 0 auto 0 0; height: auto; width: min(360px, 90vw); z-index: 10; transform: translateX(-102%); transition: transform .2s ease; }
+  .rail.open { transform: none; }
+  .scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); z-index: 9; }
+  .trow { grid-template-columns: 1fr; gap: 6px; }
+  .tblock { min-height: 40px; grid-auto-flow: column; gap: 10px; }
+  .tblock b { font-size: 28px; }
+  .tblock small { margin: 0; }
+  .cicon { width: 58px; height: 58px; }
+  .detail { grid-template-columns: 1fr; }
+  .hexboard { --gap: 3px; }
+  .zoom { padding: 8px; }
+  .zoom-in { padding: 12px 8px; }
+  .headline { font-size: 34px; }
+}
+@media (min-width: 901px) { .scrim { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* Màn hình vừa: phần chi tiết một cột để bàn cờ đủ to */
+@media (max-width: 1320px) { .detail { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 601px) and (max-width: 1320px) { .detail .hero { display: grid; justify-items: start; text-align: left; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 16px; align-items: start; } .detail .hero > * { grid-column: 2; } .detail .hero .big { grid-column: 1; grid-row: 1 / span 4; } .detail .hero .wm { display: none; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a1 1 0 0 1 1-1h9"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 3l12 9-12 9z"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="rail" id="rail" aria-label="Chọn ấn và tướng">
+    <div class="panel">
+      <p class="label">Ấn của bạn <button type="button" id="clear">Xóa hết</button></p>
+      <div class="slots" id="slots"></div>
+      <div class="levels lv" id="levels" role="group" aria-label="Cấp"></div>
+    </div>
+    <div class="panel">
+      <div class="ptabs" role="tablist">        <button type="button" role="tab" id="pt-emb" aria-selected="true">Ấn</button>
+        <button type="button" role="tab" id="pt-unit" aria-selected="false">Tướng</button>
+      </div>
+      <div class="emblems" id="emblems"></div>
+      <div id="unitpick" hidden>
+        <div class="mode" role="group" aria-label="Chế độ chọn tướng">
+          <button type="button" id="m-carry" aria-pressed="false">Carry</button>
+          <button type="button" id="m-want" aria-pressed="true">Muốn có</button>
+          <button type="button" id="m-ban" class="ban" aria-pressed="false">Loại trừ</button>
+        </div>
+        <div class="costs" id="costs" role="group" aria-label="Giá tướng"></div>
+        <input class="search" id="q" type="search" placeholder="Tìm tướng (mọi giá)" autocomplete="off" aria-label="Tìm tướng">
+        <div class="ugrid" id="units"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="label">Carry chính <button type="button" id="clear-carry">Xóa</button></p>
+      <div class="carry-row" id="carry"></div>
+      <p class="sub">Tướng muốn có <button type="button" id="clear-units">Xóa</button></p>
+      <div class="slots want-slots" id="want"></div>
+      <p class="sub">Loại trừ <button type="button" id="clear-bans">Xóa</button></p>
+      <div class="bans" id="bans"></div>
+    </div>
+    <details class="panel opts">
+      <summary class="label">Tùy chọn</summary>
+      <p class="sub">Sát thương</p>
+      <div class="levels" id="opt-dmg" role="group" aria-label="Loại sát thương"></div>
+      <p class="sub">Tộc/hệ thừa tối đa</p>
+      <div class="levels" id="opt-unused" role="group" aria-label="Tộc hệ thừa tối đa"></div>
+      <p class="sub">Tướng có tộc/hệ độc nhất tối đa</p>
+      <div class="levels" id="opt-unique" role="group" aria-label="Tướng có tộc hệ độc nhất tối đa"></div>
+    </details>
+
+    <div class="src" id="src"></div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="mbar">
+        <div class="mini" id="mini"></div>
+        <button type="button" class="pill y" id="open">Chọn ấn</button>
+      </div>
+      <div class="pills" id="pills"></div>
+      <div class="headline">Đội hình <svg><use href="#i-arrow"/></svg> <span class="y">Theo ấn</span></div>
+      <div class="tiers" id="tiers"></div>
+      <div class="bar" id="bar" hidden><i id="prog"></i></div>
+      <div id="detail"></div>
+      <aside class="side">
+        <section class="rf path" id="path" hidden aria-live="polite"></section>
+        <section class="rf" id="reforge" hidden aria-live="polite"></section>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Bàn cờ phóng to">
+  <div class="zoom-in">
+    <div class="zoom-h"><h4 id="zoom-title">Vị trí xếp</h4><button type="button" class="reset" id="zoom-reset">Đặt lại</button><button type="button" class="pill y" id="zoom-close">Đóng</button></div>
+    <div id="zoomboard"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="meta.js"></script>
+<script src="emblem-tiers.js"></script>
+<script src="scale.js"></script>
+<script src="solver.js"></script>
+<script>
+(function () {
+  const D = window.TFT_DATA;
+  const M = window.TFT_META || {};
+  const solver = window.createSolver(D, M);
+  const MAX = 4, MAX_UNITS = 4, MAX_BANS = 12;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmt = (n) => Number(n).toLocaleString('vi-VN');
+  const icon = (id) => `<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const short = (e) => e.name.replace(/^Ấn\s+/, '');
+  const baseName = (u) => D.units[u].name.replace(/\s*\(.+\)$/, '');
+  const emblemOfTrait = new Map(D.emblems.map((e) => [e.trait, e]));
+  const emblemById = new Map(D.emblems.map((e) => [e.id, e]));
+  const pickable = D.units.map((u, i) => i).filter((i) => !D.units[i].base)
+    .sort((a, b) => D.units[a].cost - D.units[b].cost || D.units[a].name.localeCompare(D.units[b].name, 'vi'));
+
+  const sample = ['Ấn Đao Phủ'].map((n) => D.emblems.findIndex((e) => e.name === n)).filter((i) => i >= 0);
+  const state = { picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: 3, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
+  try {
+    const saved = JSON.parse(localStorage.getItem('tft-emblems') || 'null');
+    if (saved && Array.isArray(saved.picked)) {
+      state.picked = saved.picked.filter((i) => D.emblems[i]).slice(0, MAX);
+      if ([7, 8, 9, 10].includes(saved.level)) state.level = saved.level;
+      if (Array.isArray(saved.locked)) state.locked = saved.locked.filter((i) => D.units[i] && !D.units[i].base).slice(0, MAX_UNITS);
+      if (Array.isArray(saved.banned)) state.banned = saved.banned.filter((i) => D.units[i] && !D.units[i].base).slice(0, MAX_BANS);
+      if (saved.carry != null && D.units[saved.carry] && !D.units[saved.carry].base) state.carry = saved.carry;
+      if (['', 'AD', 'AP'].includes(saved.dmg)) state.dmg = saved.dmg;
+      if ('maxUnused' in saved) state.maxUnused = saved.maxUnused;
+      if ('maxUnique' in saved) state.maxUnique = saved.maxUnique;
+    }
+  } catch (e) {}
+  const save = () => { try { localStorage.setItem('tft-emblems', JSON.stringify({ picked: state.picked, locked: state.locked, banned: state.banned, carry: state.carry, dmg: state.dmg, maxUnused: state.maxUnused, maxUnique: state.maxUnique, level: state.level })); } catch (e) {} };
+
+  const sm = M.sources?.stats || M.sources?.seemeta;
+  $('pills').innerHTML = `<span>Bản<b>${esc(M.patch || '?')}</b></span><span>Mùa<b>${D.set}</b></span>` + (sm ? `<span title="${esc(sm.name + (sm.patch ? ' · bản ' + sm.patch : ''))}">Số liệu<b>${fmt(sm.matches)} trận</b></span>` : '');
+  $('src').textContent = 'Trang do người chơi làm, không liên kết với Riot Games.';
+  const emblemStat = (e) => M.emblems?.[D.traits[e.trait].id];
+  // Đánh giá ấn của app (tools/emblem-tiers.cjs): hạng + lời khuyên
+  const ET = window.TFT_EMBLEM_TIERS || {};
+  const VERDICT = { ngon: 'Ngon, dùng ngay', 'tinh-huong': 'Tình huống: chỉ dùng khi đội có sẵn tộc/hệ này', 'dap-lai': 'Nên đập lại bằng Búa Rèn' };
+  const unitName = (id) => D.units.find((u) => u.id === id)?.name || id;
+
+  // ---------------- Cột trái ----------------
+  function renderPicker() {
+    const slots = [];
+    for (let i = 0; i < MAX; i++) {
+      const e = D.emblems[state.picked[i]];
+      slots.push(e ? `<button type="button" class="slot on" data-i="${i}" title="Bỏ ${esc(e.name)}"><img src="${e.img}" alt="${esc(e.name)}"></button>`
+        : `<div class="slot" aria-hidden="true">${icon('plus')}</div>`);
+    }
+    $('slots').innerHTML = slots.join('');
+    $('mini').innerHTML = state.picked.map((i) => `<img src="${D.emblems[i].img}" alt="${esc(D.emblems[i].name)}">`).join('')
+      + state.locked.map((u) => `<img src="${D.units[u].img}" alt="${esc(D.units[u].name)}" style="border-radius:50%">`).join('')
+      + `<span>Cấp ${state.level}</span>`;
+    $('levels').innerHTML = [7, 8, 9, 10].map((l) => `<button type="button" data-l="${l}" aria-pressed="${l === state.level}">Cấp ${l}</button>`).join('');
+    const full = state.picked.length >= MAX;
+    $('emblems').innerHTML = D.emblems.map((e, i) => {
+      const n = state.picked.filter((p) => p === i).length;
+      const et = ET[e.id] || {};
+      const st = { tier: et.tier };
+      const tip = [e.name + (et.tier ? ` · hạng ${et.tier}` : ''), VERDICT[et.verdict],
+        et.holder ? `Cầm tốt nhất: ${unitName(et.holder.id)} (TB ${et.holder.avg}, ${fmt(et.holder.games)} ván)` : '',
+        et.level ? `Mốc mạnh nhất: ${et.level.n} ${D.traits[e.trait].name} (TB ${et.level.avg})` : '',
+        e.recipe.length ? `Ghép: ${e.recipe.join(' + ')}` : 'Chỉ có từ lõi'].filter(Boolean).join('\n');
+      return `<button type="button" class="emb${n ? ' sel' : ''}${et.verdict === 'dap-lai' ? ' weak' : ''}" data-i="${i}" ${full ? 'disabled' : ''} title="${esc(tip)}">
+        ${n ? `<span class="cnt">×${n}</span>` : ''}${st?.tier ? `<span class="tier" data-t="${st.tier}">${st.tier}</span>` : ''}
+        <span class="hx"><img src="${e.img}" alt="" loading="lazy" decoding="async"></span><span class="nm">${esc(short(e))}</span></button>`;
+    }).join('');
+  }
+
+  function renderUnits() {
+    const want = [];
+    for (let i = 0; i < MAX_UNITS; i++) {
+      const u = state.locked[i];
+      want.push(u != null ? `<button type="button" class="slot on" data-i="${i}" title="Bỏ ${esc(D.units[u].name)}"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></button>`
+        : `<div class="slot" aria-hidden="true">${icon('plus')}</div>`);
+    }
+    $('want').innerHTML = want.join('');
+    $('bans').innerHTML = state.banned.length
+      ? state.banned.map((u, i) => `<button type="button" class="b" data-i="${i}" title="Bỏ loại trừ ${esc(D.units[u].name)}"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></button>`).join('')
+      : '<span class="empty">Chưa loại trừ tướng nào</span>';
+    const cu = state.carry;
+    $('carry').innerHTML = cu != null
+      ? `<button type="button" class="slot on" id="carry-slot" title="Bỏ ${esc(D.units[cu].name)}"><img src="${D.units[cu].img}" alt="${esc(D.units[cu].name)}"></button><span class="hint">${esc(D.units[cu].name)}</span>`
+      : '<div class="slot" aria-hidden="true">' + icon('plus') + '</div><span class="hint">Chọn ở tab Tướng → Carry</span>';
+    const seg = (id, items, cur) => { $(id).innerHTML = items.map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
+    seg('opt-dmg', [['', 'Tự do'], ['AD', 'AD'], ['AP', 'AP']], state.dmg);
+    const caps = [[1, '1'], [2, '2'], [3, '3'], [4, '4'], ['', 'Bất kỳ']];
+    seg('opt-unused', caps, state.maxUnused ?? '');
+    seg('opt-unique', caps, state.maxUnique ?? '');
+    $('m-carry').setAttribute('aria-pressed', state.unitMode === 'carry');
+    $('m-want').setAttribute('aria-pressed', state.unitMode === 'want');
+    $('m-ban').setAttribute('aria-pressed', state.unitMode === 'ban');
+    const q = $('q').value.trim().toLowerCase();
+    $('costs').innerHTML = [1, 2, 3, 4, 5].map((c) => `<button type="button" data-c="${c}" aria-pressed="${!q && c === state.cost}"><i></i>${c}</button>`).join('');
+    const full = state.unitMode === 'want' ? state.locked.length >= MAX_UNITS : state.unitMode === 'ban' ? state.banned.length >= MAX_BANS : false;
+    $('units').innerHTML = pickable.filter((i) => q ? (D.units[i].name.toLowerCase().includes(q) || D.units[i].en.toLowerCase().includes(q)) : D.units[i].cost === state.cost).sort((a, b) => D.units[b].cost - D.units[a].cost).map((i) => {
+      const u = D.units[i];
+      const sel = state.locked.includes(i), ban = state.banned.includes(i), isCarry = state.carry === i;
+      const st = M.units?.[u.id];
+      return `<button type="button" class="upick${sel ? ' sel' : ''}${ban ? ' ban' : ''}${isCarry ? ' carry' : ''}" data-u="${i}" data-c="${u.cost}" ${full && !sel && !ban ? 'disabled' : ''} title="${esc(u.name + ` · ${u.cost} vàng` + (st ? ` · hạng ${st.tier} · TB ${st.avg}` : ''))}">
+        <span class="hx"><img src="${u.img}" alt="" loading="lazy" decoding="async"></span><span class="nm">${esc(u.name)}</span></button>`;
+    }).join('') || '<p class="none" style="grid-column:1/-1">Không thấy tướng.</p>';
+  }
+
+  // Tộc/hệ đặt tên đội: nhiều tướng nhất, rồi màu mốc cao hơn (vàng > bạc > đồng), rồi điểm số liệu
+  const bpStyle = (t) => D.traits[t.trait].bps.filter(([m]) => m <= t.count).pop()?.[1] || 0;
+  const topTrait = (c) => c.traits.filter((t) => t.active && D.traits[t.trait].kind !== 'unique')
+    .sort((x, y) => y.count - x.count || bpStyle(y) - bpStyle(x) || (y.value || 0) - (x.value || 0))[0];
+
+  // ---------------- Kết quả ----------------
+  // Đội gợi ý: tên do app đặt (mốc mạnh nhất + carry), hạng S/A/B/C theo đánh giá của app.
+  function fromRec(c) {
+    const byId = c.frame ? new Map(c.frame.board.map((b) => [b.id, b])) : new Map();
+    const top = topTrait(c);
+    const carry = c.carries.slice(0, 2).map(baseName).join(' ');
+    return {
+      tier: c.tier, rating: c.rating, pct: c.pct, bestInSet: c.bestInSet, level: c.level,
+      title: [top ? `${top.count} ${D.traits[top.trait].name}` : '', carry].filter(Boolean).join(' · ') || 'Đội hình',
+      units: c.units, carries: c.carries, traits: c.traits, emblems: c.emblems,
+      board: (u) => byId.get(D.units[u].id) || byId.get(D.units[u].base),
+      positioned: !!c.frame,
+    };
+  }
+
+  // Ảnh đại diện đội: tướng đắt nhất; cùng giá thì ưu tiên carry (theo thứ tự carry), rồi tướng không phải tank
+  const mainCarry = (c) => {
+    const rank = (u) => { const i = c.carries.indexOf(u); return i < 0 ? 99 : i; };
+    return c.units.slice().sort((a, b) => D.units[b].cost - D.units[a].cost || rank(a) - rank(b)
+      || (D.units[a].tank ? 1 : 0) - (D.units[b].tank ? 1 : 0))[0];
+  };
+
+
+  function compIcon(c, i) {
+    const u = mainCarry(c);
+    const tt = topTrait(c);
+    const em = c.emblems.find((e) => e.unit === u);
+    const badge = em ? emblemOfTrait.get(em.trait).img : tt ? D.traits[tt.trait].img : null;
+    return `<button type="button" class="cicon" data-k="${i}" data-c="${D.units[u].cost}" aria-pressed="${i === state.sel}" title="${esc(c.title + (c.rating != null ? ` · ${c.rating} điểm` : ''))}">
+      <span class="ring"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></span>
+      <span class="tl" data-t="${c.tier}">${c.tier}</span>
+      ${badge ? `<span class="bd"><img${em ? ' class="e"' : ''} src="${badge}" alt=""></span>` : ''}
+    </button>`;
+  }
+
+  function renderTiers() {
+    $('tiers').innerHTML = ['S', 'A', 'B', 'C'].map((t) => {
+      const idx = state.list.map((c, i) => [c, i]).filter(([c]) => c.tier === t);
+      if (!idx.length) return '';
+      return `<section class="trow" data-t="${t}"><div class="tblock"><b>${t}</b><small>Hạng ${t}</small></div>
+        <div class="tbox">${idx.map(([c, i]) => compIcon(c, i)).join('')}</div></section>`;
+    }).join('') || (state.loading ? '<div class="loading"><i></i>Đang tìm đội hình…</div>'
+      : (state.picked.length || state.locked.length || state.carry != null ? '<p class="none">Không tìm được đội phù hợp. Thử nới giới hạn ở mục Tùy chọn hoặc bỏ bớt tướng muốn có.</p>' : '<p class="none">Chọn ấn hoặc tướng ở cột bên trái.</p>'));
+  }
+
+  // Như trang xếp đội của TFT Academy: mốc đang kích tô màu, xếp cầu vồng > vàng > độc nhất (cam) > bạc > đồng;
+  // sau đó là mốc chưa kích (xám, ghi số/mốc kế tiếp, vd 1/2).
+  const STYLE_RANK = { 6: 5, 5: 4, 4: 3, 3: 2, 1: 1 };
+  function traitsHtml(c) {
+    const isUniq = (t) => D.traits[t.trait].kind === 'unique' || t.style === 4;
+    const on = c.traits.filter((t) => t.count > 0 && (t.active || isUniq(t)))
+      .map((t) => ({ ...t, s: isUniq(t) ? 4 : t.style }))
+      .sort((x, y) => (STYLE_RANK[y.s] || 0) - (STYLE_RANK[x.s] || 0) || y.count - x.count);
+    const off = c.traits.filter((t) => t.count > 0 && !t.active && !isUniq(t)).sort((x, y) => y.count - x.count);
+    const chip = (t, off) => {
+      const tr = D.traits[t.trait];
+      const next = tr.bps.find(([m]) => m > t.count)?.[0];
+      const label = off && next ? `${t.count}<small>/${next}</small>` : t.count;
+      const tip = `${t.count} ${tr.name}` + (off && next ? ` · chưa kích (cần ${next})` : '') + (t.s === 4 ? ' · tộc/hệ độc nhất' : '') + (t.games ? ` · ${fmt(t.games)} ván` : '');
+      return `<button type="button" class="trait${off ? ' off' : ''}" data-s="${off ? 0 : t.s}" data-tr="${t.trait}" data-n="${t.count}" title="${esc(tip)}" aria-haspopup="dialog"><img src="${tr.img}" alt="${esc(tr.name)}"><span>${label}</span></button>`;
+    };
+    return on.map((t) => chip(t, false)).join('') + off.map((t) => chip(t, true)).join('');
+  }
+
+  // Popup khi bấm vào một tộc/hệ: mô tả, mốc đang đạt (đậm), danh sách tướng có tộc/hệ đó
+  function traitPopup(ti, n, anchor) {
+    closeTraitPopup();
+    const tr = D.traits[ti];
+    const cur = tr.bps.filter(([m]) => m <= n).pop()?.[0];
+    const rows = (tr.rows || []).map((r) => `<span class="r${r.min === cur ? ' on' : ''}">${esc(r.text)}</span>`).join('');
+    const units = D.units.map((u, i) => i).filter((i) => !D.units[i].hidden && D.units[i].traits.includes(ti))
+      .sort((a, b) => D.units[a].cost - D.units[b].cost || D.units[a].name.localeCompare(D.units[b].name));
+    const el = document.createElement('div');
+    el.className = 'tpop'; el.id = 'tpop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', tr.name);
+    el.innerHTML = `<div class="hd"><img src="${tr.img}" alt=""><b>${esc(tr.name)}</b></div>
+      <div class="ds">${tr.desc ? `<span class="in">${esc(tr.desc)}</span>` : ''}${rows}</div>
+      ${units.length ? `<div class="us">${units.map((i) => `<img src="${D.units[i].img}" data-c="${D.units[i].cost}" alt="${esc(D.units[i].name)}" title="${esc(D.units[i].name)} · ${D.units[i].cost} vàng">`).join('')}</div>` : ''}`;
+    document.body.appendChild(el);
+    const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+    let x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+    let y = r.bottom + 8;
+    if (y + h > innerHeight - 8) y = Math.max(8, r.top - h - 8);
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    anchor.setAttribute('aria-expanded', 'true');
+    popScroll = scrollY;
+  }
+  let popScroll = 0;
+  function closeTraitPopup() {
+    document.getElementById('tpop')?.remove();
+    document.querySelectorAll('.trait[aria-expanded]').forEach((b) => b.removeAttribute('aria-expanded'));
+  }
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button.trait');
+    if (b) {
+      const open = b.getAttribute('aria-expanded') === 'true';
+      if (open) closeTraitPopup(); else traitPopup(+b.dataset.tr, +b.dataset.n, b);
+      return;
+    }
+    if (!ev.target.closest('#tpop')) closeTraitPopup();
+  });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeTraitPopup(); });
+  // Cuộn trang xa hơn một chút thì đóng popup
+  window.addEventListener('scroll', () => { if (Math.abs(scrollY - popScroll) > 40) closeTraitPopup(); }, { passive: true });
+  window.addEventListener('resize', closeTraitPopup);
+
+  function unitCell(u, c) {
+    const unit = D.units[u];
+    const b = c.board(u);
+    const items = (b?.items || []).map((id) => {
+      const em = emblemById.get(id);
+      if (em) return `<img src="${em.img}" alt="" data-e="${em.trait}">`;
+      const it = D.items?.[id];
+      return it ? `<img src="${it.img}" alt="" title="${esc(it.name)}">` : '';
+    });
+    const mine = [];
+    for (const e of c.emblems.filter((x) => x.unit === u && !x.fixed)) {
+      const em = emblemOfTrait.get(e.trait);
+      mine.push(`<img class="mine" src="${em.img}" alt="" data-e="${e.trait}">`);
+    }
+    const vt = unit.base && unit.extra?.[0] ? D.traits[unit.extra[0][0]] : null;
+    const want = state.locked.some((w) => w === u || D.units[w].id === unit.base);
+    return `<div class="u${want ? ' want' : ''}" data-u="${u}" data-c="${unit.cost}">
+      <span class="ring"><img src="${unit.img}" alt="${esc(unit.name)}" loading="lazy" decoding="async"></span>
+      ${vt ? `<span class="vt"><img src="${vt.img}" alt=""></span>` : ''}${unit.slots > 1 ? '<span class="w2">2 ô</span>' : ''}
+      <span class="nm">${esc(baseName(u))}</span><span class="its">${mine.concat(items).slice(0, 3).join('')}</span>
+    </div>`;
+  }
+
+  // Bàn cờ 4 hàng × 7 ô. Đội TFT Academy dùng đúng vị trí của họ; đội khác tự xếp: tank hàng trên, còn lại hàng dưới.
+  const compKey = (c) => c.kind + '|' + c.title + '|' + c.units.join(',');
+  function boardCells(c) {
+    const saved = state.pos.get(compKey(c));
+    if (saved) return saved.slice();
+    const cells = new Array(28).fill(null);
+    if (c.positioned) {
+      // Giữ vị trí của đội mẫu nếu đúng hàng theo luật tầm đánh
+      for (const u of c.units) { const b = c.board(u); if (b?.hex != null && b.hex < 28 && !cells[b.hex] && Math.floor(b.hex / 7) === rowOf(u)) cells[b.hex] = u; }
+    }
+    // Tướng chưa có vị trí: đặt vào ô gần nhất với vị trí quen thuộc của tướng đó trong các đội TFT Academy
+    const left = c.units.filter((u) => !cells.includes(u))
+      .map((u) => ({ u, ...posPref(u) }))
+      .sort((a, b) => b.n - a.n); // tướng có nhiều dữ liệu vị trí xếp trước
+    for (const p of left) {
+      let best = -1, bestD = Infinity;
+      for (let k = 0; k < 28; k++) {
+        if (cells[k] != null) continue;
+        const d = 3 * Math.abs(Math.floor(k / 7) - p.row) + Math.abs((k % 7) - p.col);
+        if (d < bestD) { bestD = d; best = k; }
+      }
+      if (best >= 0) cells[best] = p.u;
+    }
+    return cells;
+  }
+  // Vị trí quen thuộc của từng tướng (hàng hay đứng nhất, cột trung bình) học từ các đội TFT Academy.
+  // Chưa có dữ liệu thì theo vai trò: tank hàng đầu, đánh gần hàng 2, đánh xa hàng cuối.
+  const POS = (() => {
+    const m = new Map();
+    for (const c of M.comps || []) for (const b of c.board || []) {
+      if (b.hex == null || b.hex >= 28) continue;
+      if (!m.has(b.id)) m.set(b.id, { rows: [0, 0, 0, 0], cols: [] });
+      const s = m.get(b.id);
+      s.rows[Math.floor(b.hex / 7)]++;
+      s.cols.push(b.hex % 7);
+    }
+    return m;
+  })();
+  // Hàng theo tầm đánh: tank / cận chiến (tầm 1) hàng 1, tầm 2 hàng 2 (vd Kennen), tầm xa hàng cuối.
+  // Ngoại lệ: tướng tầm 2 nhưng đánh tay đôi ở tuyến đầu (Gnar, Rồng Cổ Đại).
+  const FRONT_RANGE2 = new Set(['Gnar', 'Elder Dragon']);
+  function rowOf(u) {
+    const unit = D.units[u];
+    const r = unit.range || 1;
+    if (unit.tank || r <= 1 || FRONT_RANGE2.has(unit.en)) return 0;
+    return r === 2 ? 1 : 3;
+  }
+  function posPref(u) {
+    const unit = D.units[u];
+    const s = POS.get(unit.id) || POS.get(unit.base);
+    const row = rowOf(u);
+    if (s && s.cols.length) {
+      const col = Math.round(s.cols.reduce((a, b) => a + b, 0) / s.cols.length);
+      return { row, col, n: s.cols.length };
+    }
+    return { row, col: 3, n: 0 };
+  }
+  function boardHtml(c) {
+    const cells = boardCells(c);
+    let html = '';
+    for (let r = 0; r < 4; r++) {
+      html += '<div class="r">';
+      for (let k = 0; k < 7; k++) { const p = r * 7 + k; const u = cells[p]; html += `<div class="c" data-p="${p}">${u != null ? unitCell(u, c) : ''}</div>`; }
+      html += '</div>';
+    }
+    return `<div class="hexboard">${html}</div>`;
+  }
+
+  function renderDetail() {
+    const c = state.list[state.sel];
+    if (!c) { $('detail').innerHTML = ''; return; }
+    const carry = mainCarry(c);
+    const em = c.emblems.find((e) => e.unit === carry);
+    const t = c.tier;
+    const holders = c.emblems.map((e) => {
+      const emb = emblemOfTrait.get(e.trait);
+      if (e.unit == null) return `<div class="holder bad"><img class="ei" src="${emb.img}" alt="" data-e="${e.trait}"><span></span><span></span><div><b>${esc(short(emb))}</b><small>Không có tướng cầm được</small></div></div>`;
+      // Ấn không đẩy tộc/hệ lên mốc nào: nói rõ là cầm tạm lấy chỉ số, không cố kích
+      const useless = !e.lifts;
+      const sub = useless ? 'Không lên mốc · cầm tạm để lấy chỉ số'
+        : (e.stats ? `TB ${e.stats.avg} · ${fmt(e.stats.games)} ván` : 'Chưa đủ số liệu');
+      const gain = !useless && e.after !== e.before ? ` · ${e.before}→${e.after} ${D.traits[e.trait].name}` : '';
+      return `<div class="holder"><img class="ei" src="${emb.img}" alt="" data-e="${e.trait}"><svg viewBox="0 0 24 24"><path d="M7 3l12 9-12 9z"/></svg>
+        <img class="hp" src="${D.units[e.unit].img}" alt=""><div><b>${esc(D.units[e.unit].name)}</b><small>${esc(sub + gain)}</small></div></div>`;
+    }).join('');
+    const gold = c.units.reduce((a, u) => a + 3 * D.units[u].cost, 0);
+    const chips = [`<span class="chip score" data-t="${t}" title="Điểm 0–100 so với đội mạnh nhất có thể ở cấp ${c.level} (mọi bộ ấn)${c.pct != null ? ` · mạnh hơn ${c.pct}% đội tốt nhất của các bộ ấn khác` : ''}">Điểm <b>${c.rating ?? '–'}</b>/100</span>`,
+      ...(c.bestInSet && t !== 'S' ? ['<span class="chip" title="Bộ ấn này không mạnh, nhưng đây là đội tốt nhất có thể với nó">Tốt nhất cho bộ ấn này</span>'] : []),
+      `<span class="chip">Cấp ${c.level}</span>`, `<span class="chip" title="Tổng vàng để có cả đội ở 2 sao (mỗi tướng 3 bản)">Tổng giá 2★: ${gold} vàng</span>`];
+    const weak = [...new Set(c.emblems.filter((e) => e.unit == null || !e.lifts).map((e) => short(emblemOfTrait.get(e.trait))))];
+    if (weak.length) chips.push(`<span class="chip warn">Ấn ${esc(weak.join(', '))} không lên mốc</span>`);
+    $('detail').innerHTML = `<div class="detail trow" data-t="${t}">
+      <aside class="hero">
+        <span class="wm">${t}</span>
+        <div class="big"><span class="ring"><img src="${D.units[carry].img}" alt="${esc(D.units[carry].name)}"></span>${em ? `<span class="em"><img src="${emblemOfTrait.get(em.trait).img}" alt=""></span>` : ''}</div>
+        <h2>${esc(c.title)}</h2>
+        <div class="traits">${traitsHtml(c)}</div>
+        ${c.emblems.length ? `<h4>Ấn của bạn</h4><div class="holders">${holders}</div>` : ''}
+      </aside>
+      <div class="right">
+        <div class="rhead">
+          <span class="ctab"><span class="tl">${t}</span>${esc(c.title)}</span>${chips.join('')}
+          <div class="acts">
+            <button type="button" class="pill y copy" data-code="${solver.teamCode(c.units)}">${icon('copy')}<span>Mã đội</span></button>
+          </div>
+        </div>
+        <div class="box"><div class="board">${c.units.map((u) => unitCell(u, c)).join('')}</div></div>
+        <div class="box" id="boardbox"><div class="boxh"><h4>Vị trí xếp</h4><button type="button" class="reset" id="reset-pos" ${state.pos.has(compKey(c)) ? '' : 'hidden'}>Đặt lại</button><button type="button" class="pill zbtn" id="zoom-open">Phóng to</button></div>${boardHtml(c)}</div>
+      </div>
+    </div>`;
+  }
+
+  async function compute() {
+    const run = ++state.run;
+    const traits = state.picked.map((i) => D.emblems[i].trait);
+    const locked = state.locked.slice(), banned = state.banned.slice();
+    state.sel = 0;
+    state.loading = false;
+    $('reforge').hidden = true;
+    $('path').hidden = true;
+    if (!traits.length && !locked.length && state.carry == null) { state.list = []; renderTiers(); renderDetail(); return; }
+    state.loading = true;
+    state.list = [];
+    renderTiers(); renderDetail();
+    const result = await solver.recommendAsync(traits, state.level, 10, (p) => {
+      if (run === state.run) $('prog').style.width = Math.round((p.done / p.total) * 100) + '%';
+    }, { locked, banned, carry: state.carry, dmg: state.dmg || null, maxUnused: state.maxUnused, maxUnique: state.maxUnique });
+    if (run !== state.run) return;
+    state.loading = false;
+    $('prog').style.width = '0';
+    state.list = pickShown(result).map(fromRec);
+    renderTiers(); renderDetail();
+    await runPlan(run, traits, { locked, banned, carry: state.carry, dmg: state.dmg || null, maxUnused: state.maxUnused, maxUnique: state.maxUnique });
+    if (run !== state.run) return;
+    runReforge(run, traits, { locked, banned, carry: state.carry, dmg: state.dmg || null, maxUnused: state.maxUnused, maxUnique: state.maxUnique });
+  }
+
+  // ---------------- Hai lối chơi: Lên 8 / Lên 9 ----------------
+  // Hai con đường riêng (không phải hai chặng): Lên 8 = roll ở cấp 8 lấy bài thủ; Lên 9 = giữ kinh tế, chịu máu, lên 9 mới roll.
+  const planCache = new Map();
+  let planRes = null, planTab = 'up9';
+  const tierOfPct = (p) => (p == null ? null : p >= 90 ? 'S' : p >= 65 ? 'A' : p >= 30 ? 'B' : 'C');
+  async function runPlan(run, traits, opts) {
+    const box = $('path');
+    if (!traits.length) { box.hidden = true; return; }
+    const key = JSON.stringify([traits, opts]);
+    let res = planCache.get(key);
+    if (!res) {
+      box.hidden = false;
+      box.innerHTML = `<div class="hd">Lối chơi: Lên 8 hay Lên 9 <small>Đang tính…</small></div><div class="pg"><i id="pathp"></i></div>`;
+      await new Promise((r) => setTimeout(r, 50));
+      if (run !== state.run) return;
+      res = await solver.planAsync(traits, opts, (p) => { const el = document.getElementById('pathp'); if (el) el.style.width = Math.round(p * 100) + '%'; });
+      if (run !== state.run) return;
+      planCache.set(key, res);
+    }
+    planRes = res;
+    planTab = res?.pick === 'up8' ? 'up8' : res?.up9 ? 'up9' : 'up8';
+    renderPlan();
+  }
+  function renderPlan() {
+    const box = $('path');
+    const res = planRes;
+    if (!res) { box.hidden = true; return; }
+    box.hidden = false;
+    const plan = res[planTab] || res.up8 || res.up9;
+    const ems = (list) => list.map((t) => `<img src="${emblemOfTrait.get(t).img}" alt="" data-e="${t}">`).join('');
+    const titles = planTab === 'up8' ? ['Cấp 8', 'Lên 9'] : ['Chịu máu', 'Cấp 9', 'Cấp 10'];
+    const pu = (u, cls = '') => `<span class="pu${cls}" data-c="${D.units[u].cost}" data-u="${u}"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></span>`;
+    const steps = plan.steps.map((st, i) => {
+      const added = new Set(st.added);
+      const isMain = st === plan.main;
+      const units = st.units.slice().sort((a, b) => added.has(a) - added.has(b) || D.units[b].cost - D.units[a].cost);
+      const notes = [];
+      if (st.removed.length) notes.push(`<span class="nt"><i>Bán</i>${st.removed.map((u) => pu(u, ' sm sold')).join('')}</span>`);
+      // Ấn tháo ra được: ghi ấn gắn mới, hoặc chuyển sang người khác so với bước trước
+      const prevFx = i ? plan.steps[i - 1].fixed : null;
+      const moved = st.emblems.filter((e) => e.unit != null && (!prevFx || prevFx.get(e.trait) !== e.unit));
+      if (moved.length) notes.push(`<span class="nt"><i>Ấn</i>${moved.map((e) => `<span class="mv">${ems([e.trait])}${pu(e.unit, ' sm')}</span>`).join('')}</span>`);
+      const t = isMain ? tierOfPct(st.pct) : null;
+      const tag = isMain ? `<span class="tl" data-t="${t || 'C'}">${t || '–'}</span><small>${Math.max(0, Math.min(100, Math.round(st.rating)))}đ</small>` : '';
+      return `<div class="step${isMain ? ' main' : ''}">
+        <div class="lv"><b>${esc(titles[i])}</b>${tag}</div>
+        <div class="us">${units.map((u) => pu(u, added.has(u) ? ' new' : '')).join('')}</div>
+        <button type="button" class="pill y copy" data-code="${solver.teamCode(st.units)}">${icon('copy')}<span>Mã</span></button>
+        ${notes.length ? `<div class="note">${notes.join('')}</div>` : ''}
+      </div>`;
+    }).join('');
+    const rec = (k) => res.pick === k ? ' <em class="rec">Nên chọn</em>' : '';
+    const tabs = `<div class="tabs" role="tablist">
+      ${res.up8 ? `<button type="button" role="tab" data-pt="up8" aria-selected="${planTab === 'up8'}">Lên 8${rec('up8')}</button>` : ''}
+      ${res.up9 ? `<button type="button" role="tab" data-pt="up9" aria-selected="${planTab === 'up9'}">Lên 9${rec('up9')}</button>` : ''}</div>`;
+    // Nên bắt sớm: tướng của đội về sau chưa có ở bước đầu — gặp thì mua giữ hàng chờ
+    const first = new Set(plan.steps[0].units.map((u) => D.units[u].base || D.units[u].id));
+    const later = [...new Set(plan.steps.slice(1).flatMap((st) => st.units))].filter((u) => !first.has(D.units[u].base || D.units[u].id))
+      .sort((a, b) => D.units[b].cost - D.units[a].cost);
+    const hold = later.length ? `<div class="hold"><b>Nên bắt sớm</b><div class="us">${later.map((u) => pu(u)).join('')}</div></div>` : '';
+    box.innerHTML = `<div class="hd">Lối chơi</div>${tabs}${hold}<div class="steps">${steps}</div>`;
+  }
+  $('path').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-pt]');
+    if (!b || b.dataset.pt === planTab) return;
+    planTab = b.dataset.pt;
+    renderPlan();
+  });
+
+  // ---------------- Gợi ý đập ấn (Búa Rèn) ----------------
+  // Chỉ dùng cho đầu game (còn đổi đội tự do): so với đội mạnh nhất có thể sau khi đập.
+  // Cuối game đã bỏ: khi giữ đội cố định thì gần như luôn khuyên giữ, không có ích.
+  const reforgeCache = new Map();
+  let rfCtx = null; // { run, traits, opts }
+  function runReforge(run, traits, opts) {
+    rfCtx = { run, traits, opts };
+    updateReforge();
+  }
+  async function updateReforge() {
+    const box = $('reforge');
+    const ctx = rfCtx;
+    if (!ctx || !ctx.traits.length || ctx.run !== state.run || !state.list.length) { box.hidden = true; return; }
+    box.hidden = false;
+    const key = JSON.stringify([ctx.traits, state.level, ctx.opts]);
+    let res = reforgeCache.get(key);
+    if (!res) {
+      box.innerHTML = `<div class="hd">Có nên đập ấn? <small>Đang thử đập từng ấn…</small></div><div class="pg"><i id="rfp"></i></div>`;
+      await new Promise((r) => setTimeout(r, 200));
+      if (rfCtx !== ctx || ctx.run !== state.run) return;
+      res = await solver.reforgeAdvice(ctx.traits, state.level, ctx.opts,
+        (p) => { const el = document.getElementById('rfp'); if (el) el.style.width = Math.round(p * 100) + '%'; },
+        () => rfCtx !== ctx || ctx.run !== state.run);
+      if (!res) return;
+      reforgeCache.set(key, res);
+      if (rfCtx !== ctx) return;
+    }
+    renderReforge(res);
+  }
+  // Đổi chênh lệch điểm thô sang thang 0–100 đang hiển thị
+  const toScale = (x) => { const q = solver.scaleOf(state.level, state.picked.length); return q ? (x * 100) / Math.max(1, q[100] - q[0]) : x; };
+  function renderReforge(res) {
+    const box = $('reforge');
+    const emb = (t) => emblemOfTrait.get(t);
+    const nm = (t) => short(emb(t));
+    const pts = (x) => Math.abs(Math.round(toScale(x)));
+    const go = new Set(res.pick.idx);
+    const head = go.size
+      ? `Nên đập ấn ${res.pick.traits.map((t) => esc(nm(t))).join(' và ')}`
+      : 'Giữ tất cả ấn';
+    const sub = go.size
+      ? `Đập xong, trung bình đội mạnh hơn khoảng ${pts(res.pick.gain)} điểm.`
+      : 'Đập ấn nào cũng dễ ra ấn tệ hơn.';
+    const rows = res.singles.map((x) => {
+      const on = go.has(x.index);
+      const why = on ? 'ấn này kéo đội yếu đi, đập ra ấn khác thường tốt hơn'
+        : x.gain > 0 ? 'đập có thể tốt hơn chút ít, nhưng không đáng'
+        : 'đang có ích, đập dễ ra ấn tệ hơn';
+      return `<div class="it ${on ? 'go' : 'keep'}"><img src="${emb(x.trait).img}" alt="${esc(nm(x.trait))}"><span class="v">${on ? 'Đập' : 'Giữ'}</span><span class="tx"><b>${esc(nm(x.trait))}</b>: ${why}.</span></div>`;
+    }).join('');
+    const detail = res.singles.map((x) => `<li><b>${esc(nm(x.trait))}</b>: đập ra ấn khác thì trung bình ${x.gain >= 0 ? 'mạnh hơn' : 'yếu đi'} ${pts(x.gain)} điểm · ${x.better}/${x.of} ấn tốt hơn · đẹp nhất nếu ra ${x.best.map((t) => esc(nm(t))).join(', ')}</li>`).join('');
+    box.innerHTML = `<div class="hd">${head} <small>${sub}</small></div><div class="list">${rows}</div>
+      <details class="more"><summary>Xem số liệu</summary><ul>${detail}</ul></details>`;
+  }
+
+  // Chỉ hiện tối đa 4 đội: ưu tiên hạng S, A; chưa đủ 4 thì mới lấy thêm hạng B, rồi C
+  const MAX_SHOWN = 4;
+  function pickShown(list) {
+    const order = ['S', 'A', 'B', 'C'];
+    return list.slice()
+      .sort((a, b) => (order.indexOf(a.tier) + 1 || 9) - (order.indexOf(b.tier) + 1 || 9) || (b.rating || 0) - (a.rating || 0))
+      .slice(0, MAX_SHOWN);
+  }
+
+  function refresh() { renderPicker(); renderUnits(); save(); compute(); }
+
+  // ---------------- Sự kiện ----------------
+  $('emblems').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.emb');
+    if (!b || b.disabled || state.picked.length >= MAX) return;
+    state.picked.push(+b.dataset.i); refresh();
+  });
+  $('slots').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.slot.on'); if (!b) return;
+    state.picked.splice(+b.dataset.i, 1); refresh();
+  });
+  $('levels').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b) return;
+    state.level = +b.dataset.l; refresh();
+  });
+  $('clear').addEventListener('click', () => { state.picked = []; refresh(); });
+  $('clear-units').addEventListener('click', () => { state.locked = []; refresh(); });
+  $('clear-bans').addEventListener('click', () => { state.banned = []; refresh(); });
+  $('units').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.upick'); if (!b || b.disabled) return;
+    const u = +b.dataset.u;
+    if (state.unitMode === 'carry') {
+      state.carry = state.carry === u ? null : u;
+      const bi = state.banned.indexOf(u); if (bi >= 0) state.banned.splice(bi, 1);
+      refresh();
+      return;
+    }
+    const [list, other, max] = state.unitMode === 'want' ? [state.locked, state.banned, MAX_UNITS] : [state.banned, state.locked, MAX_BANS];
+    const at = list.indexOf(u);
+    if (at >= 0) list.splice(at, 1);
+    else if (list.length < max) { list.push(u); const o = other.indexOf(u); if (o >= 0) other.splice(o, 1); }
+    refresh();
+  });
+  $('want').addEventListener('click', (ev) => { const b = ev.target.closest('.slot.on'); if (!b) return; state.locked.splice(+b.dataset.i, 1); refresh(); });
+  $('bans').addEventListener('click', (ev) => { const b = ev.target.closest('.b'); if (!b) return; state.banned.splice(+b.dataset.i, 1); refresh(); });
+  $('q').addEventListener('input', renderUnits);
+  $('costs').addEventListener('click', (ev) => { const b = ev.target.closest('button'); if (!b) return; state.cost = +b.dataset.c; $('q').value = ''; renderUnits(); });
+  $('m-want').addEventListener('click', () => { state.unitMode = 'want'; renderUnits(); });
+  $('m-carry').addEventListener('click', () => { state.unitMode = 'carry'; renderUnits(); });
+  $('carry').addEventListener('click', (ev) => { if (ev.target.closest('#carry-slot')) { state.carry = null; refresh(); } });
+  $('clear-carry').addEventListener('click', () => { state.carry = null; refresh(); });
+  const optClick = (id, key, num) => $(id).addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b) return;
+    const v = b.dataset.v;
+    state[key] = num ? (v === '' ? null : +v) : v;
+    refresh();
+  });
+  optClick('opt-dmg', 'dmg', false);
+  optClick('opt-unused', 'maxUnused', true);
+  optClick('opt-unique', 'maxUnique', true);
+  $('m-ban').addEventListener('click', () => { state.unitMode = 'ban'; renderUnits(); });
+  const setPick = (p) => {
+    $('pt-emb').setAttribute('aria-selected', p === 'emb'); $('pt-unit').setAttribute('aria-selected', p === 'unit');
+    $('emblems').hidden = p !== 'emb'; $('unitpick').hidden = p !== 'unit';
+  };
+  $('pt-emb').addEventListener('click', () => setPick('emb'));
+  $('pt-unit').addEventListener('click', () => setPick('unit'));
+  $('tiers').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.cicon'); if (!b) return;
+    state.sel = +b.dataset.k; renderTiers(); renderDetail();
+    $('detail').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+  // ---------- Kéo thả tướng trên bàn cờ ----------
+  let drag = null;
+  function redrawBoard() {
+    const c = state.list[state.sel];
+    const box = $('boardbox');
+    if (!c || !box) return;
+    box.querySelector('.hexboard').outerHTML = boardHtml(c);
+    $('reset-pos').hidden = !state.pos.has(compKey(c));
+    if (!$('zoom').hidden) $('zoomboard').innerHTML = boardHtml(c).replace('class="hexboard"', 'class="hexboard big"');
+  }
+  function openZoom() {
+    const c = state.list[state.sel];
+    if (!c) return;
+    $('zoom-title').textContent = 'Vị trí xếp · ' + c.title;
+    $('zoom').hidden = false;
+    $('zoomboard').innerHTML = boardHtml(c).replace('class="hexboard"', 'class="hexboard big"');
+    $('zoom-close').focus();
+  }
+  const closeZoom = () => { $('zoom').hidden = true; };
+  $('zoom-close').addEventListener('click', closeZoom);
+  $('zoom').addEventListener('click', (ev) => { if (ev.target === $('zoom')) closeZoom(); });
+  $('zoom-reset').addEventListener('click', () => { state.pos.delete(compKey(state.list[state.sel])); redrawBoard(); });
+  window.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('zoom').hidden) closeZoom(); });
+  document.addEventListener('pointerdown', (ev) => {
+    const el = ev.target.closest('.hexboard .u, .box .board .u');
+    if (!el || ev.button > 0) return;
+    ev.preventDefault();
+    // Bóng kéo: bọc trong khung giống bàn cờ gốc để giữ nguyên kích thước và kiểu
+    const host = el.closest('.hexboard, .board');
+    const ghost = document.createElement('div');
+    ghost.className = host.className + ' drag-ghost';
+    const r = el.getBoundingClientRect();
+    ghost.style.width = r.width + 'px';
+    ghost.style.setProperty('--w', r.width + 'px'); // ngoài khung bàn cờ thì đơn vị cqw không còn đúng
+    const inner = el.cloneNode(true);
+    if (host.classList.contains('hexboard')) {
+      const cell = document.createElement('div');
+      cell.className = 'c';
+      cell.appendChild(inner);
+      ghost.appendChild(cell);
+    } else ghost.appendChild(inner);
+    document.body.appendChild(ghost);
+    el.classList.add('dragging');
+    drag = { u: +el.dataset.u, el, ghost, over: null, w: r.width, h: r.height, x: ev.clientX, y: ev.clientY, raf: 0 };
+    moveGhost();
+  });
+  // Chỉ cập nhật một lần mỗi khung hình: dời bóng bằng transform (không tính lại bố cục) rồi tìm ô bên dưới
+  function moveGhost() {
+    if (!drag) return;
+    drag.raf = 0;
+    drag.ghost.style.transform = `translate3d(${drag.x - drag.w / 2}px, ${drag.y - drag.h / 2}px, 0) scale(1.08)`;
+    const cell = document.elementFromPoint(drag.x, drag.y)?.closest('.hexboard:not(.drag-ghost) .c');
+    if (cell !== drag.over) {
+      drag.over?.classList.remove('over');
+      cell?.classList.add('over');
+      drag.over = cell;
+    }
+  }
+  window.addEventListener('pointermove', (ev) => {
+    if (!drag) return;
+    drag.x = ev.clientX; drag.y = ev.clientY;
+    if (!drag.raf) drag.raf = requestAnimationFrame(moveGhost);
+  }, { passive: true });
+  const endDrag = (ev) => {
+    if (!drag) return;
+    const { u, el, ghost, over, raf } = drag;
+    if (raf) cancelAnimationFrame(raf);
+    drag = null;
+    ghost.remove();
+    el.classList.remove('dragging');
+    over?.classList.remove('over');
+    if (!over || ev.type === 'pointercancel') return;
+    const c = state.list[state.sel];
+    const cells = boardCells(c);
+    const from = cells.indexOf(u), to = +over.dataset.p;
+    if (from === to) return;
+    const other = cells[to];
+    cells[to] = u;
+    if (from >= 0) cells[from] = other ?? null; // ô có tướng thì hai tướng đổi chỗ
+    state.pos.set(compKey(c), cells);
+    redrawBoard();
+  };
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+  $('detail').addEventListener('click', (ev) => {
+    if (ev.target.closest('#zoom-open')) { openZoom(); return; }
+    if (!ev.target.closest('#reset-pos')) return;
+    state.pos.delete(compKey(state.list[state.sel]));
+    redrawBoard();
+  });
+
+  // ---------- Thông tin khi di chuột (giữ lâu trên điện thoại) vào tướng hoặc ấn ----------
+  const ROLE = { Tank: 'Đỡ đòn', Fighter: 'Chiến binh', Assassin: 'Sát thủ', Caster: 'Kỹ năng', Marksman: 'Xạ thủ', Specialist: 'Chuyên biệt' };
+  function roleText(unit) {
+    const [dmg, kind] = (unit.role || '').split(' ');
+    return [dmg === 'Magic' ? 'Phép' : dmg === 'Attack' ? 'Vật lý' : '', ROLE[kind] || kind].filter(Boolean).join(' · ');
+  }
+  const compCount = (c, t) => c?.traits.find((x) => x.trait === t)?.count || 0;
+  function unitTip(u, c) {
+    const unit = D.units[u];
+    const extra = new Map(unit.extra || []);
+    const ems = c ? c.emblems.filter((e) => e.unit === u).map((e) => e.trait) : [];
+    const trs = [...new Set(unit.traits.concat(ems))];
+    const rows = trs.map((t) => {
+      const tr = D.traits[t], n = compCount(c, t);
+      const on = c && c.traits.some((x) => x.trait === t && (x.active || tr.kind === 'unique'));
+      const tag = (ems.includes(t) && !unit.traits.includes(t) ? ' (ấn)' : '') + (extra.get(t) ? ' ×2' : '');
+      return `<div class="tr${on ? ' on' : ''}"><img src="${tr.img}" alt=""><span>${esc(tr.name + tag)}</span>${c ? `<em>${n}</em>` : ''}</div>`;
+    }).join('');
+    const st = M.units?.[unit.id] || M.units?.[unit.base];
+    return `<div class="h"><b>${esc(unit.name)}</b><small>${unit.cost} vàng</small></div>
+      <div class="sub">${esc(roleText(unit))} · tầm đánh ${unit.range || 1}${unit.tank ? ' · tank' : ''}</div>${rows}
+      ${st?.avg ? `<div class="ft">Hạng TB ${st.avg} · ${fmt(st.games)} ván</div>` : ''}`;
+  }
+  function emblemTip(t, c) {
+    const tr = D.traits[t], em = emblemOfTrait.get(t);
+    const n = compCount(c, t);
+    const bps = tr.bps.map(([m]) => m).filter((m) => m < 9);
+    const cur = bps.filter((m) => m <= n).pop();
+    const holder = c?.emblems.find((e) => e.trait === t && e.unit != null);
+    const es = M.emblems?.[tr.id];
+    return `<div class="h"><b>${esc(em ? em.name : tr.name)}</b><small>${esc(tr.name)}</small></div>
+      ${tr.desc ? `<div class="sub">${esc(tr.desc.split('\n')[0])}</div>` : ''}
+      <div class="bp">${bps.map((m) => `<i class="${m === cur ? 'on' : ''}">${m}</i>`).join('')}</div>
+      <div class="ft">${c ? `Đội có ${n} ${esc(tr.name)}` : ''}${holder ? ` · ${esc(D.units[holder.unit].name)} cầm` : ''}${es?.avg ? `<br>Ấn này: hạng TB ${es.avg} · ${fmt(es.games)} ván` : ''}</div>`;
+  }
+  let tipEl = null, tipFor = null, pressT = 0;
+  function showTip(target, x) {
+    const c = target.closest('#detail, #zoom') ? state.list[state.sel] : null;
+    const html = target.dataset.e != null ? emblemTip(+target.dataset.e, c) : unitTip(+target.dataset.u, c);
+    if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'utip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl); }
+    tipEl.innerHTML = html; tipEl.hidden = false; tipFor = target;
+    const r = target.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    let left = r.right + 10, top = r.top;
+    if (left + w > innerWidth - 8) left = r.left - w - 10;
+    if (left < 8) left = Math.min(Math.max(8, (x ?? r.left) - w / 2), innerWidth - w - 8);
+    if (top + h > innerHeight - 8) top = Math.max(8, innerHeight - h - 8);
+    tipEl.style.left = left + 'px'; tipEl.style.top = top + 'px';
+  }
+  const hideTip = () => { if (tipEl) tipEl.hidden = true; tipFor = null; };
+  const tipTarget = (el) => el?.closest?.('[data-e], #detail .u, #zoom .u, .path .pu');
+  document.addEventListener('pointerover', (ev) => {
+    if (ev.pointerType !== 'mouse' || drag) return;
+    const t = tipTarget(ev.target);
+    if (t && t !== tipFor) showTip(t);
+    else if (!t && tipFor) hideTip();
+  });
+  document.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse') { hideTip(); return; }
+    const t = tipTarget(ev.target);
+    clearTimeout(pressT);
+    if (t) pressT = setTimeout(() => showTip(t, ev.clientX), 450); else hideTip();
+  });
+  document.addEventListener('pointermove', (ev) => { if (ev.pointerType !== 'mouse' && drag) clearTimeout(pressT); }, { passive: true });
+  document.addEventListener('pointerup', () => clearTimeout(pressT));
+  window.addEventListener('scroll', hideTip, { passive: true });
+
+  const setRail = (open) => { $('rail').classList.toggle('open', open); $('scrim').hidden = !open; };
+  $('open').addEventListener('click', () => setRail(true));
+  $('scrim').addEventListener('click', () => setRail(false));
+
+  // Sao chép mã đội; nếu trình duyệt chặn thì hiện ô chứa mã đã bôi đen sẵn.
+  document.addEventListener('click', async (ev) => {
+    const b = ev.target.closest('.copy[data-code]'); if (!b) return;
+    const code = b.dataset.code, label = b.querySelector('span');
+    try {
+      await navigator.clipboard.writeText(code);
+      b.classList.add('ok'); b.querySelector('use').setAttribute('href', '#i-check'); label.textContent = 'Đã chép';
+      setTimeout(() => { b.classList.remove('ok'); b.querySelector('use').setAttribute('href', '#i-copy'); label.textContent = 'Mã đội'; }, 1600);
+    } catch (e) {
+      const row = b.closest('.rhead');
+      let box = row.querySelector('.code');
+      if (!box) { box = document.createElement('input'); box.className = 'code'; box.readOnly = true; box.setAttribute('aria-label', 'Mã đội hình'); row.appendChild(box); }
+      box.value = code; box.focus(); box.select(); label.textContent = 'Ctrl+C';
+    }
+  });
+
+  refresh();
+})();
+</script>
