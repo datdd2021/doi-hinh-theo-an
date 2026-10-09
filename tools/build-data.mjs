@@ -3,6 +3,7 @@
 // Chạy:  node tools/build-data.mjs
 // Đổi set: node tools/build-data.mjs TFTSet18
 
+import { buildAbilities } from './abilities.mjs';
 import { mkdir, writeFile, access, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -99,6 +100,10 @@ async function main() {
     getJson(`${CDRAGON}/plugins/rcp-be-lol-game-data/global/default/v1/tftchampions-teamplanner.json`).catch(() => ({})),
     getJson(`${CDRAGON}/content-metadata.json`).catch(() => ({ version: '?' })),
   ]);
+  // Kỹ năng tướng (số theo sao) từ TFT Academy — để hiện khi di chuột; lỗi thì bỏ qua
+  const setNo = SET_MUTATOR.replace(/\D/g, '');
+  const acChamps = await getJson(`https://api.tftacademy.com/api/collections/better_champions/records?perPage=200&filter=${encodeURIComponent('(set=' + setNo + ')')}`)
+    .then((r) => r.items || []).catch(() => []);
   const set = data.setData.find((s) => s.mutator === SET_MUTATOR);
   if (!set) throw new Error(`Không thấy ${SET_MUTATOR}. Có: ${data.setData.map((s) => s.mutator).join(', ')}`);
   // Tên tiếng Anh (để khớp với đội hình meta trên các trang như TFT Academy).
@@ -144,6 +149,15 @@ async function main() {
   const variantBases = new Set(
     champs.filter((c) => /\(.+\)$/.test(c.name)).map((c) => c.name.replace(/\s*\(.+\)$/, '')),
   );
+  const abilities = buildAbilities(champs, acChamps);
+  // Biến thể (Lux …) chưa có trên Academy thì dùng kỹ năng của bản gốc; icon tải về img/a/
+  const abFor = (c) => {
+    const a = abilities.get(c.apiName) || abilities.get(baseId.get(c.name.replace(/\s*\(.+\)$/, '')));
+    if (!a) return null;
+    const icon = `img/a/${c.apiName}.webp`;
+    jobs.push(() => download(a.icon, join(WEB, icon)));
+    return { name: a.name, text: a.text, rules: a.rules, mana: a.mana, icon, lang: a.lang };
+  };
   const units = [];
   for (const c of champs) {
     const base = c.name.replace(/\s*\(.+\)$/, '');
@@ -189,6 +203,7 @@ async function main() {
       extra: Object.entries(extra).map(([t, n]) => [Number(t), n]),
       group: isVariant ? base : onlyOne != null ? traits[onlyOne].name : null,
       img,
+      ...(abFor(c) ? { ab: abFor(c) } : {}),
     });
   }
 

@@ -289,20 +289,29 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .rf .more ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
 .rf .more b { color: var(--ink); }
 .tpop { position: fixed; z-index: 60; width: 288px; max-width: calc(100vw - 16px); background: #121417; border: 2px solid #34383c; border-radius: 12px; padding: 12px; color: #fff; text-align: left; box-shadow: 0 12px 32px rgba(0,0,0,.5); }
-.utip { position: fixed; z-index: 70; width: 260px; max-width: calc(100vw - 16px); background: #121417; border: 2px solid #34383c; border-radius: 12px; padding: 10px 12px; color: #fff; box-shadow: 0 12px 32px rgba(0,0,0,.55); pointer-events: none; font-size: 12.5px; }
-.utip .h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.utip .h b { font: 900 16px/22px var(--body); }
-.utip .h small { font-size: 11px; font-weight: 800; color: #c9c9c9; background: #2a2d31; border-radius: 6px; padding: 2px 7px; white-space: nowrap; }
-.utip .sub { color: #a5a7ab; margin: 2px 0 8px; font-size: 11.5px; }
-.utip .tr { display: flex; align-items: center; gap: 7px; padding: 2px 0; }
-.utip .tr img { width: 18px; height: 18px; }
-.utip .tr span { flex: 1; font-weight: 700; }
-.utip .tr em { font-style: normal; font-weight: 900; color: #a5a7ab; }
-.utip .tr.on em { color: var(--yellow); }
-.utip .bp { display: flex; gap: 4px; margin: 6px 0 2px; flex-wrap: wrap; }
-.utip .bp i { font-style: normal; font-weight: 900; font-size: 11.5px; padding: 1px 7px; border-radius: 6px; background: #2a2d31; color: #a5a7ab; }
-.utip .bp i.on { background: var(--yellow); color: #111; }
-.utip .ft { margin-top: 8px; padding-top: 7px; border-top: 1px solid #2a2d31; color: #c9c9c9; }
+.utip { position: fixed; z-index: 70; width: 288px; max-width: calc(100vw - 16px); background: #121417; border: 2px solid var(--cc, #34383c); border-radius: 12px; padding: 12px; color: #fff; display: flex; flex-direction: column; gap: 8px; pointer-events: none; font: 400 14px/1.35 var(--body); box-shadow: 0 0 18px color-mix(in srgb, var(--cc, #000) 22%, transparent), 0 20px 25px -5px rgba(0,0,0,.35), 0 8px 10px -6px rgba(0,0,0,.35); }
+.utip .cardh { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.utip .cardh b { font-size: 18px; font-weight: 900; line-height: 1.15; }
+.utip .cardh small { flex: none; font-size: 14px; line-height: 1.25; padding: 2px 8px; border-radius: 8px; background: #404040; opacity: .7; white-space: nowrap; }
+.utip .cardm { display: flex; justify-content: space-between; }
+.utip .cardm .l { display: flex; flex-direction: column; gap: 2px; width: 66%; }
+.utip .cardm .r { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+.utip .tr, .utip .cardm .r span { display: flex; align-items: center; gap: 4px; }
+.utip .tr img { width: 16px; height: 16px; }
+.utip .cardm .r svg { width: 16px; height: 16px; color: #fff; }
+.utip .line { border-bottom: 1px solid var(--cc, #34383c); }
+.utip .abh { display: flex; gap: 8px; align-items: flex-start; }
+.utip .abh img { flex: none; width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+.utip .abh b { display: block; font-size: 14px; font-weight: 600; }
+.utip .mana { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #3c98ce; }
+.utip .mana svg { width: 10px; height: 12px; }
+.utip .mana.gray { color: #a5a7ab; }
+.utip .abd { font-size: 12px; line-height: 1.4; }
+.utip .st { font-weight: 700; }
+.utip .st.ad { color: rgb(218, 121, 39); } .utip .st.ap { color: rgb(83, 86, 229); } .utip .st.armor { color: rgb(236, 180, 77); } .utip .st.as { color: rgb(226, 196, 67); }
+.utip .rules { font-size: 11.5px; font-style: italic; color: #a5a7ab; }
+.utip .bps { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #a5a7ab; }
+.utip .bps .r.on { color: #fff; font-weight: 700; }
 .tpop .hd { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .tpop .hd img { width: 48px; height: 48px; flex: none; }
 .tpop .hd b { font: 900 18px/28px var(--body); }
@@ -368,15 +377,15 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .u .st { position: absolute; z-index: 2; top: -1px; left: 0; width: 70px; display: flex; justify-content: center; gap: 1px; }
 .u .st svg { width: 11px; height: 11px; fill: var(--yellow); stroke: #000; stroke-width: 2.5; paint-order: stroke; }
 .u .its { position: absolute; z-index: 2; left: 0; width: 70px; top: 56px; display: flex; justify-content: center; gap: 0; }
-.u .its img { width: 20px; height: 20px; clip-path: var(--hex); background: #000; margin: 0 -1px; }
-.u .its img.mine { background: var(--yellow); padding: 1.5px; }
+.u .its img { width: 24px; height: 24px; border-radius: 5px; background: #000; margin: 0 1px; box-shadow: 0 0 0 1px #000; }
+.u .its img.mine { box-shadow: 0 0 0 2px var(--yellow); }
 .u .vt { position: absolute; z-index: 2; top: 12px; right: 9px; width: 19px; height: 19px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #26262e, #0b0b0f 75%); box-shadow: 0 0 0 1.5px var(--bp5), 0 1px 4px rgba(0, 0, 0, .7); display: grid; place-items: center; }
 .u .vt img { width: 64%; height: 64%; object-fit: contain; }
 .u .w2 { position: absolute; z-index: 2; top: 10px; left: 0; font-size: 9px; font-weight: 900; background: var(--yellow); color: #111; border-radius: 3px; padding: 0 3px; }
 .u.want .nm { color: var(--yellow); }
 .grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 #boardbox { container-type: inline-size; padding: 12px 8px 10px; overflow: hidden; }
-.hexboard { --gap: 5px; --w: min(112px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5)); --h: calc(var(--w) * 1.05); --fs: max(9px, calc(var(--w) * .16)); --it: calc(var(--w) * .26); width: max-content; margin: 0 auto; padding: 4px 0 calc(var(--h) * .25 + 2px); }
+.hexboard { --gap: 5px; --w: min(112px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5)); --h: calc(var(--w) * 1.05); --fs: max(9px, calc(var(--w) * .16)); --it: calc(var(--w) * .32); width: max-content; margin: 0 auto; padding: 4px 0 calc(var(--h) * .25 + 2px); }
 .zoom-in { container-type: inline-size; width: min(96vw, 1240px); }
 .hexboard.big { --gap: 7px; --w: min(160px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5), calc((100vh - 170px) / 3.45)); }
 .zoom-in { overflow: hidden; }
@@ -388,7 +397,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .hexboard .c .u { position: absolute; inset: 0; width: var(--w); height: var(--h); }
 .hexboard .c .u .ring { width: var(--w); height: var(--h); }
 .hexboard .c .u .nm { top: calc(var(--h) * .52); width: var(--w); font-size: var(--fs); }
-.hexboard .c .u .its { top: calc(var(--h) * .7); width: var(--w); } .hexboard .c .u .its img { width: var(--it); height: var(--it); }
+.hexboard .c .u .its { top: calc(var(--h) * .66); width: var(--w); } .hexboard .c .u .its img { width: var(--it); height: var(--it); }
 .zoom { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, .78); display: grid; place-items: center; padding: 20px; }
 .zoom-in { max-width: 100%; max-height: 100%; overflow: auto; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 20px 20px; }
 .zoom-h { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -593,11 +602,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       const n = state.picked.filter((p) => p === i).length;
       const et = ET[e.id] || {};
       const st = { tier: et.tier };
-      const tip = [e.name + (et.tier ? ` · hạng ${et.tier}` : ''), VERDICT[et.verdict],
-        et.holder ? `Cầm tốt nhất: ${unitName(et.holder.id)} (TB ${et.holder.avg}, ${fmt(et.holder.games)} ván)` : '',
-        et.level ? `Mốc mạnh nhất: ${et.level.n} ${D.traits[e.trait].name} (TB ${et.level.avg})` : '',
-        e.recipe.length ? `Ghép: ${e.recipe.join(' + ')}` : 'Chỉ có từ lõi'].filter(Boolean).join('\n');
-      return `<button type="button" class="emb${n ? ' sel' : ''}${et.verdict === 'dap-lai' ? ' weak' : ''}" data-i="${i}" ${full ? 'disabled' : ''} title="${esc(tip)}">
+      return `<button type="button" class="emb${n ? ' sel' : ''}${et.verdict === 'dap-lai' ? ' weak' : ''}" data-i="${i}" data-e="${e.trait}" ${full ? 'disabled' : ''}>
         ${n ? `<span class="cnt">×${n}</span>` : ''}${st?.tier ? `<span class="tier" data-t="${st.tier}">${st.tier}</span>` : ''}
         <span class="hx"><img src="${e.img}" alt="" loading="lazy" decoding="async"></span><span class="nm">${esc(short(e))}</span></button>`;
     }).join('');
@@ -633,7 +638,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       const u = D.units[i];
       const sel = state.locked.includes(i), ban = state.banned.includes(i), isCarry = state.carry === i;
       const st = M.units?.[u.id];
-      return `<button type="button" class="upick${sel ? ' sel' : ''}${ban ? ' ban' : ''}${isCarry ? ' carry' : ''}" data-u="${i}" data-c="${u.cost}" ${full && !sel && !ban ? 'disabled' : ''} title="${esc(u.name + ` · ${u.cost} vàng` + (st ? ` · hạng ${st.tier} · TB ${st.avg}` : ''))}">
+      return `<button type="button" class="upick${sel ? ' sel' : ''}${ban ? ' ban' : ''}${isCarry ? ' carry' : ''}" data-u="${i}" data-c="${u.cost}" ${full && !sel && !ban ? 'disabled' : ''}>
         <span class="hx"><img src="${u.img}" alt="" loading="lazy" decoding="async"></span><span class="nm">${esc(u.name)}</span></button>`;
     }).join('') || '<p class="none" style="grid-column:1/-1">Không thấy tướng.</p>';
   }
@@ -737,8 +742,10 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   document.addEventListener('click', (ev) => {
     const b = ev.target.closest('button.trait');
     if (b) {
+      // đang hiện do di chuột thì bấm để ghim lại; đã ghim thì bấm để đóng
       const open = b.getAttribute('aria-expanded') === 'true';
-      if (open) closeTraitPopup(); else traitPopup(+b.dataset.tr, +b.dataset.n, b);
+      if (open && b.dataset.pinned === '1') { delete b.dataset.pinned; closeTraitPopup(); }
+      else { if (!open) traitPopup(+b.dataset.tr, +b.dataset.n, b); b.dataset.pinned = '1'; }
       return;
     }
     if (!ev.target.closest('#tpop')) closeTraitPopup();
@@ -1196,45 +1203,53 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   });
 
   // ---------- Thông tin khi di chuột (giữ lâu trên điện thoại) vào tướng hoặc ấn ----------
-  const ROLE = { Tank: 'Đỡ đòn', Fighter: 'Chiến binh', Assassin: 'Sát thủ', Caster: 'Kỹ năng', Marksman: 'Xạ thủ', Specialist: 'Chuyên biệt' };
+  // Khung thông tin kiểu TFT Academy: viền màu giá tướng, tên + vai trò, tộc/hệ | tầm đánh, giá; kỹ năng (icon, tên, năng lượng, mô tả có số theo sao)
+  const ROLE = { Tank: 'Đỡ đòn', Fighter: 'Đấu sĩ', Assassin: 'Sát thủ', Caster: 'Pháp sư', Marksman: 'Xạ thủ', Specialist: 'Đặc biệt' };
   function roleText(unit) {
     const [dmg, kind] = (unit.role || '').split(' ');
-    return [dmg === 'Magic' ? 'Phép' : dmg === 'Attack' ? 'Vật lý' : '', ROLE[kind] || kind].filter(Boolean).join(' · ');
+    return [ROLE[kind] || kind, dmg === 'Magic' ? 'AP' : dmg === 'Attack' ? 'AD' : ''].filter(Boolean).join(' ');
   }
-  const compCount = (c, t) => c?.traits.find((x) => x.trait === t)?.count || 0;
-  function unitTip(u, c) {
+  const ICON_RANGE = '<svg viewBox="0 0 16 16"><path d="M2 14 12 4M9 3h4v4M2 11l3 3M4 9l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const ICON_GOLD = '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="#f5c542"/><circle cx="8" cy="8" r="4.2" fill="none" stroke="#a87b12" stroke-width="1.3"/></svg>';
+  const ICON_MANA = '<svg viewBox="0 0 16 16"><path d="M8 1.5C6 5 3.5 7.6 3.5 10.2a4.5 4.5 0 0 0 9 0C12.5 7.6 10 5 8 1.5z" fill="currentColor"/></svg>';
+  // ⟦ap|250/350/3000⟧ → số tô màu theo loại; ⟦b|…⟧ → in đậm
+  const abText = (s) => esc(s).replace(/⟦(\w+)\|([^⟧]*)⟧/g, (_, k, v) => (k === 'b' ? `<b>${v}</b>` : `<b class="st ${k}">${v}</b>`)).replace(/\n/g, '<br>');
+  const traitRows = (ts) => ts.map((t) => `<span class="tr"><img src="${D.traits[t].img}" alt="">${esc(D.traits[t].name)}</span>`).join('');
+  function unitTip(u) {
     const unit = D.units[u];
-    const extra = new Map(unit.extra || []);
-    const ems = c ? c.emblems.filter((e) => e.unit === u).map((e) => e.trait) : [];
-    const trs = [...new Set(unit.traits.concat(ems))];
-    const rows = trs.map((t) => {
-      const tr = D.traits[t], n = compCount(c, t);
-      const on = c && c.traits.some((x) => x.trait === t && (x.active || tr.kind === 'unique'));
-      const tag = (ems.includes(t) && !unit.traits.includes(t) ? ' (ấn)' : '') + (extra.get(t) ? ' ×2' : '');
-      return `<div class="tr${on ? ' on' : ''}"><img src="${tr.img}" alt=""><span>${esc(tr.name + tag)}</span>${c ? `<em>${n}</em>` : ''}</div>`;
-    }).join('');
-    const st = M.units?.[unit.id] || M.units?.[unit.base];
-    return `<div class="h"><b>${esc(unit.name)}</b><small>${unit.cost} vàng</small></div>
-      <div class="sub">${esc(roleText(unit))} · tầm đánh ${unit.range || 1}${unit.tank ? ' · tank' : ''}</div>${rows}
-      ${st?.avg ? `<div class="ft">Hạng TB ${st.avg} · ${fmt(st.games)} ván</div>` : ''}`;
+    const ab = unit.ab;
+    return `<div class="cardh"><b>${esc(baseName(u))}</b><small>${esc(roleText(unit))}</small></div>
+      <div class="cardm"><div class="l">${traitRows(unit.traits)}</div>
+        <div class="r"><span>${ICON_RANGE}${unit.range || 1}</span><span>${ICON_GOLD}${unit.cost}</span></div></div>
+      ${ab ? `<div class="line"></div>
+      <div class="abh"><img src="${ab.icon}" alt="" onerror="this.src='${unit.img}'"><div><b>${esc(ab.name)}</b><span class="mana">${ICON_MANA}${ab.mana[0]} / ${ab.mana[1]}</span></div></div>
+      <div class="abd">${abText(ab.text)}</div>
+      ${ab.rules.length ? `<div class="rules">${ab.rules.map((r) => esc(r)).join('<br>')}</div>` : ''}` : ''}`;
+  }
+  // Ở bảng chọn ấn: thêm đánh giá ấn (hạng, nên dùng hay đập, tướng cầm tốt nhất)
+  function emblemInfo(em) {
+    const et = em && ET[em.id];
+    if (!et) return '';
+    const lines = [et.tier ? 'Hạng ' + et.tier + (VERDICT[et.verdict] ? ' · ' + VERDICT[et.verdict] : '') : '',
+      et.holder ? 'Cầm tốt nhất: ' + unitName(et.holder.id) + ' (TB ' + et.holder.avg + ')' : ''].filter(Boolean);
+    return lines.length ? '<div class="line"></div><div class="bps">' + lines.map((l) => '<span class="r on">' + esc(l) + '</span>').join('') + '</div>' : '';
   }
   function emblemTip(t, c) {
     const tr = D.traits[t], em = emblemOfTrait.get(t);
-    const n = compCount(c, t);
-    const bps = tr.bps.map(([m]) => m).filter((m) => m < 9);
-    const cur = bps.filter((m) => m <= n).pop();
-    const holder = c?.emblems.find((e) => e.trait === t && e.unit != null);
-    const es = M.emblems?.[tr.id];
-    return `<div class="h"><b>${esc(em ? em.name : tr.name)}</b><small>${esc(tr.name)}</small></div>
-      ${tr.desc ? `<div class="sub">${esc(tr.desc.split('\n')[0])}</div>` : ''}
-      <div class="bp">${bps.map((m) => `<i class="${m === cur ? 'on' : ''}">${m}</i>`).join('')}</div>
-      <div class="ft">${c ? `Đội có ${n} ${esc(tr.name)}` : ''}${holder ? ` · ${esc(D.units[holder.unit].name)} cầm` : ''}${es?.avg ? `<br>Ấn này: hạng TB ${es.avg} · ${fmt(es.games)} ván` : ''}</div>`;
+    const n = c?.traits.find((x) => x.trait === t)?.count || 0;
+    const rows = (tr.rows || []).filter((r) => r.min < 9).map((r) => `<span class="r${n >= r.min && !(tr.rows.find((x) => x.min > r.min && x.min <= n)) ? ' on' : ''}">${esc(r.text)}</span>`).join('');
+    const recipe = em?.recipe?.length ? em.recipe.join(' + ') : 'Chỉ có từ lõi nâng cấp / phần thưởng';
+    return `<div class="cardh"><b>${esc(em ? em.name : tr.name)}</b><small>Ấn</small></div>
+      <div class="abh"><img src="${em ? em.img : tr.img}" alt=""><div><b>Cầm: nhận tộc/hệ ${esc(tr.name)}</b><span class="mana gray">${esc(recipe)}</span></div></div>
+      ${rows ? `<div class="line"></div><div class="bps">${rows}</div>` : ''}${c ? '' : emblemInfo(em)}`;
   }
   let tipEl = null, tipFor = null, pressT = 0;
   function showTip(target, x) {
     const c = target.closest('#detail, #zoom') ? state.list[state.sel] : null;
-    const html = target.dataset.e != null ? emblemTip(+target.dataset.e, c) : unitTip(+target.dataset.u, c);
+    const isEm = target.dataset.e != null;
+    const html = isEm ? emblemTip(+target.dataset.e, c) : unitTip(+target.dataset.u);
     if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'utip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl); }
+    tipEl.style.setProperty('--cc', isEm ? 'var(--yellow)' : `var(--c${D.units[+target.dataset.u].cost})`);
     tipEl.innerHTML = html; tipEl.hidden = false; tipFor = target;
     const r = target.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
     let left = r.right + 10, top = r.top;
@@ -1244,9 +1259,13 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     tipEl.style.left = left + 'px'; tipEl.style.top = top + 'px';
   }
   const hideTip = () => { if (tipEl) tipEl.hidden = true; tipFor = null; };
-  const tipTarget = (el) => el?.closest?.('[data-e], #detail .u, #zoom .u, .path .pu');
+  const tipTarget = (el) => el?.closest?.('[data-e], #detail .u, #zoom .u, .path .pu, .upick');
+  let traitHover = null;
   document.addEventListener('pointerover', (ev) => {
     if (ev.pointerType !== 'mouse' || drag) return;
+    const tb = ev.target.closest?.('button.trait');
+    if (tb && tb !== traitHover && tb.getAttribute('aria-expanded') !== 'true') { traitHover = tb; traitPopup(+tb.dataset.tr, +tb.dataset.n, tb); }
+    else if (!tb && traitHover && !ev.target.closest?.('#tpop')) { if (traitHover.dataset.pinned !== '1') closeTraitPopup(); traitHover = null; }
     const t = tipTarget(ev.target);
     if (t && t !== tipFor) showTip(t);
     else if (!t && tipFor) hideTip();
