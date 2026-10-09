@@ -80,6 +80,13 @@ img, svg { display: block; }
 .emblems { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px 2px; }
 .emblems .emb .hx { width: 54px; height: 54px; }
 .levels.lv { margin-top: 12px; }
+.go { display: block; width: 100%; height: 42px; margin-top: 12px; border-radius: 8px; background: var(--yellow); color: #111; font: 900 15px/1 var(--body); letter-spacing: .02em; }
+.go:hover { filter: brightness(1.08); }
+.go:disabled { opacity: .6; cursor: progress; }
+.go.pulse { animation: goPulse 1.6s ease-in-out infinite; }
+@keyframes goPulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--yellow) 55%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+.stale-note { margin: 0 0 10px; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--yellow) 14%, var(--card)); border: 1px solid color-mix(in srgb, var(--yellow) 45%, transparent); font-size: 13px; }
+.main.stale .tiers, .main.stale #detail, .main.stale .side { opacity: .4; pointer-events: none; transition: opacity .15s; }
 details.opts summary { cursor: pointer; list-style: none; margin: 0; }
 details.opts summary::after { content: "▾"; color: var(--dim); font-size: 12px; }
 details.opts[open] summary { margin-bottom: 4px; }
@@ -211,7 +218,8 @@ details.opts[open] summary::after { content: "▴"; }
 .cicon .bd { position: absolute; z-index: 2; bottom: -2px; left: 50%; transform: translateX(-50%); width: 24px; height: 26px; clip-path: var(--hex); background: var(--bg); display: grid; place-items: center; }
 .cicon .bd::before { content: ""; position: absolute; inset: 2px; clip-path: var(--hex); background: var(--card-2); }
 .cicon .bd img { position: relative; width: 15px; height: 15px; }
-.cicon .bd img.e { position: absolute; inset: 0; margin: auto; width: calc(100% - 4px); height: calc(100% - 4px); clip-path: var(--hex); object-fit: cover; }
+.cicon .ems { position: absolute; z-index: 3; bottom: -6px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; }
+.cicon .ems img { width: 22px; height: 22px; border-radius: 4px; box-shadow: 0 0 0 1.5px #000, 0 0 0 3px var(--yellow), 0 3px 6px rgba(0, 0, 0, .7); }
 .cicon:hover .ring { transform: scale(1.05); }
 .cicon[aria-pressed="true"]::after { content: ""; position: absolute; inset: -5px; clip-path: var(--hex); background: var(--tc); z-index: -1; }
 .cicon[aria-pressed="true"] { z-index: 0; filter: drop-shadow(0 0 12px color-mix(in srgb, var(--tc) 55%, transparent)); }
@@ -323,6 +331,9 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .tpop .us img { width: 34px; height: 36px; object-fit: cover; border: 2px solid var(--c1); border-radius: 4px; }
 .tpop .us img[data-c="2"] { border-color: var(--c2); } .tpop .us img[data-c="3"] { border-color: var(--c3); }
 .tpop .us img[data-c="4"] { border-color: var(--c4); } .tpop .us img[data-c="5"] { border-color: var(--c5); }
+.tpop .us .uw { position: relative; display: inline-block; }
+.tpop .us .uw .eb { position: absolute; right: -3px; bottom: -3px; width: 16px; height: 16px; border: 0; border-radius: 3px; box-shadow: 0 0 0 1.5px #000; }
+.tpop .us img.off { filter: grayscale(1) brightness(.6); border-color: #4a4d52; }
 .trait span { padding-top: 2px; }
 .trait[data-s="1"] { background: radial-gradient(circle at 0 0, #7b472c, transparent 70%), radial-gradient(circle at 100% 100%, #79462b, transparent 70%), #93563a; }
 .trait[data-s="3"] { background: radial-gradient(circle at 0 0, #a9adb6, transparent 70%), radial-gradient(circle at 100% 100%, #acb0b8, transparent 70%), #7d828f; }
@@ -352,6 +363,14 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .right { display: grid; gap: 12px; min-width: 0; }
 .rhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ctab { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px 0 6px; border-radius: 9px 9px 0 0; background: var(--card); border: 1px solid var(--line); border-bottom: 0; font-size: 14px; font-weight: 900; }
+.vtabs { display: flex; gap: 4px; flex-wrap: wrap; flex-basis: 100%; }
+.vtab { cursor: pointer; color: var(--dim); background: var(--bg-2); max-width: 260px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.vtab[aria-selected="true"] { color: var(--ink); background: var(--card); box-shadow: inset 0 2px 0 var(--tc, var(--yellow)); }
+.vtab[data-t="S"] .tl { --t1: var(--s1); --t2: var(--s2); } .vtab[data-t="A"] .tl { --t1: var(--a1); --t2: var(--a2); }
+.vtab[data-t="B"] .tl { --t1: var(--b1); --t2: var(--b2); } .vtab[data-t="C"] .tl { --t1: var(--cc1); --t2: var(--cc2); }
+.cicon .stk { position: absolute; inset: 0; clip-path: var(--hex); background: #2a2d31; transform: translateX(calc(var(--n) * 12px)) scale(calc(1 - var(--n) * .08)); opacity: calc(.75 - var(--n) * .2); }
+.cicon .stk img { position: absolute; inset: 0; margin: auto; width: 86%; height: 86%; clip-path: var(--hex); object-fit: cover; filter: grayscale(.4) brightness(.7); }
+.cicon { margin-right: 10px; }
 .ctab .tl { width: 18px; height: 18px; clip-path: var(--hex); background: linear-gradient(0deg, var(--t1, var(--g1)), var(--t2, var(--g2))); display: grid; place-items: center; font-size: 10px; color: #111; }
 .chip { font-size: 12.5px; font-weight: 700; color: var(--dim); background: var(--card-2); border-radius: 999px; padding: 4px 11px; }
 .chip.warn { color: var(--a2); }
@@ -377,7 +396,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .u .st { position: absolute; z-index: 2; top: -1px; left: 0; width: 70px; display: flex; justify-content: center; gap: 1px; }
 .u .st svg { width: 11px; height: 11px; fill: var(--yellow); stroke: #000; stroke-width: 2.5; paint-order: stroke; }
 .u .its { position: absolute; z-index: 2; left: 0; width: 70px; top: 56px; display: flex; justify-content: center; gap: 0; }
-.u .its img { width: 24px; height: 24px; border-radius: 5px; background: #000; margin: 0 1px; box-shadow: 0 0 0 1px #000; }
+.u .its img { width: 21px; height: 21px; border-radius: 5px; background: #000; margin: 0 1px; box-shadow: 0 0 0 1px #000; }
 .u .its img.mine { box-shadow: 0 0 0 2px var(--yellow); }
 .u .vt { position: absolute; z-index: 2; top: 12px; right: 9px; width: 19px; height: 19px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #26262e, #0b0b0f 75%); box-shadow: 0 0 0 1.5px var(--bp5), 0 1px 4px rgba(0, 0, 0, .7); display: grid; place-items: center; }
 .u .vt img { width: 64%; height: 64%; object-fit: contain; }
@@ -385,7 +404,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .u.want .nm { color: var(--yellow); }
 .grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 #boardbox { container-type: inline-size; padding: 12px 8px 10px; overflow: hidden; }
-.hexboard { --gap: 5px; --w: min(112px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5)); --h: calc(var(--w) * 1.05); --fs: max(9px, calc(var(--w) * .16)); --it: calc(var(--w) * .32); width: max-content; margin: 0 auto; padding: 4px 0 calc(var(--h) * .25 + 2px); }
+.hexboard { --gap: 5px; --w: min(112px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5)); --h: calc(var(--w) * 1.05); --fs: max(9px, calc(var(--w) * .16)); --it: calc(var(--w) * .28); width: max-content; margin: 0 auto; padding: 4px 0 calc(var(--h) * .25 + 2px); }
 .zoom-in { container-type: inline-size; width: min(96vw, 1240px); }
 .hexboard.big { --gap: 7px; --w: min(160px, calc((100cqw - 6.5 * var(--gap) - 6px) / 7.5), calc((100vh - 170px) / 3.45)); }
 .zoom-in { overflow: hidden; }
@@ -393,20 +412,23 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 @container (max-width: 430px) { .hexboard .c .u .nm { display: none; } }
 .hexboard .r { display: flex; gap: var(--gap); height: calc(var(--h) * .75 + 6px); }
 .hexboard .r:nth-child(even) { margin-left: calc((var(--w) + var(--gap)) / 2); }
-.hexboard .c { position: relative; width: var(--w); height: var(--h); clip-path: var(--hex); background: var(--cell); }
+/* ô lục giác vẽ ở lớp nền (::before) để ấn/trang bị của tướng được tràn ra ngoài ô, nổi lên trên như Academy */
+.hexboard .c { position: relative; width: var(--w); height: var(--h); }
+.hexboard .c::before { content: ""; position: absolute; inset: 0; clip-path: var(--hex); background: var(--cell); }
 .hexboard .c .u { position: absolute; inset: 0; width: var(--w); height: var(--h); }
 .hexboard .c .u .ring { width: var(--w); height: var(--h); }
 .hexboard .c .u .nm { top: calc(var(--h) * .52); width: var(--w); font-size: var(--fs); }
-.hexboard .c .u .its { top: calc(var(--h) * .66); width: var(--w); } .hexboard .c .u .its img { width: var(--it); height: var(--it); }
+.hexboard .c .u .its { top: calc(var(--h) * .78); width: var(--w); z-index: 5; gap: 2px; } .hexboard .c .u .its img { width: var(--it); height: var(--it); margin: 0; border-radius: 4px; box-shadow: 0 0 0 1.5px #000, 0 3px 6px rgba(0, 0, 0, .7); }
+.hexboard .c .u .its img.mine { box-shadow: 0 0 0 2px var(--yellow), 0 3px 6px rgba(0, 0, 0, .7); }
 .zoom { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, .78); display: grid; place-items: center; padding: 20px; }
 .zoom-in { max-width: 100%; max-height: 100%; overflow: auto; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 20px 20px; }
 .zoom-h { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .zoom-h h4 { margin: 0; font-size: 16px; font-weight: 900; flex: 1; }
 .zoom-h .reset { position: static; }
 .hexboard .c .u, .board .u { cursor: grab; touch-action: none; user-select: none; }
-.hexboard .c.over { background: color-mix(in srgb, var(--yellow) 35%, var(--cell)); }
+.hexboard .c.over::before { background: color-mix(in srgb, var(--yellow) 35%, var(--cell)); }
 .drag-ghost { position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; opacity: .92; will-change: transform; margin: 0 !important; padding: 0 !important; transition: none !important; }
-.drag-ghost .c { background: transparent !important; }
+.drag-ghost .c::before { display: none; }
 .u.dragging { opacity: .35; }
 .boxh { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 12px; position: relative; }
 .boxh h4 { margin: 0 !important; }
@@ -470,6 +492,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       <p class="label">Ấn của bạn <button type="button" id="clear">Xóa hết</button></p>
       <div class="slots" id="slots"></div>
       <div class="levels lv" id="levels" role="group" aria-label="Cấp"></div>
+      <button type="button" class="go" id="go">Tìm đội hình</button>
     </div>
     <div class="panel">
       <div class="ptabs" role="tablist">        <button type="button" role="tab" id="pt-emb" aria-selected="true">Ấn</button>
@@ -517,6 +540,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       </div>
       <div class="pills" id="pills"></div>
       <div class="headline">Đội hình <svg><use href="#i-arrow"/></svg> <span class="y">Theo ấn</span></div>
+      <div class="stale-note" id="stale" hidden>Đã đổi lựa chọn · bấm <b>Tìm đội hình</b> để xem kết quả mới</div>
       <div class="tiers" id="tiers"></div>
       <div class="bar" id="bar" hidden><i id="prog"></i></div>
       <div id="detail"></div>
@@ -558,7 +582,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     .sort((a, b) => D.units[a].cost - D.units[b].cost || D.units[a].name.localeCompare(D.units[b].name, 'vi'));
 
   const sample = ['Ấn Đao Phủ'].map((n) => D.emblems.findIndex((e) => e.name === n)).filter((i) => i >= 0);
-  const state = { picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: null, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
+  const state = { groups: [], picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: null, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
   try {
     const saved = JSON.parse(localStorage.getItem('tft-emblems') || 'null');
     if (saved && Array.isArray(saved.picked)) {
@@ -664,33 +688,49 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   }
 
   // Ảnh đại diện đội: tướng đắt nhất; cùng giá thì ưu tiên carry (theo thứ tự carry), rồi tướng không phải tank
-  const mainCarry = (c) => {
+  const avatarOrder = (c) => {
     const rank = (u) => { const i = c.carries.indexOf(u); return i < 0 ? 99 : i; };
     return c.units.slice().sort((a, b) => D.units[b].cost - D.units[a].cost || rank(a) - rank(b)
-      || (D.units[a].tank ? 1 : 0) - (D.units[b].tank ? 1 : 0))[0];
+      || (D.units[a].tank ? 1 : 0) - (D.units[b].tank ? 1 : 0));
+  };
+  const mainCarry = (c) => c.avatar ?? avatarOrder(c)[0];
+  // Chọn ảnh đại diện cho cả danh sách: tướng đắt nhất (ưu tiên carry); tướng đã làm đại diện cho đội trước thì đội sau chọn tướng khác (Lux vẫn được dùng, chỉ không lặp lại)
+  function assignAvatars(list) {
+    const used = new Set();
+    const key = (u) => D.units[u].base || D.units[u].id;
+    for (const c of list) {
+      const order = avatarOrder(c);
+      const top = D.units[order[0]].cost;
+      const pick = order.find((u) => D.units[u].cost >= top - 1 && !used.has(key(u)))
+        || order.find((u) => !used.has(key(u))) || order[0];
+      c.avatar = pick;
+      used.add(key(pick));
+    }
+    return list;
   };
 
 
-  function compIcon(c, i) {
+  function compIcon(c, i, g = [i]) {
     const u = mainCarry(c);
+    const stack = g.slice(1).map((k, n) => `<span class="stk" style="--n:${n + 1}"><img src="${D.units[mainCarry(state.list[k])].img}" alt=""></span>`).reverse().join('');
     const tt = topTrait(c);
-    const em = c.emblems.find((e) => e.unit === u);
-    const badge = em ? emblemOfTrait.get(em.trait).img : tt ? D.traits[tt.trait].img : null;
-    return `<button type="button" class="cicon" data-k="${i}" data-c="${D.units[u].cost}" aria-pressed="${i === state.sel}" title="${esc(c.title + (c.rating != null ? ` · ${c.rating} điểm` : ''))}">
-      <span class="ring"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></span>
+    const ems = c.emblems.filter((e) => e.unit === u);
+    const badge = ems.length ? null : tt ? D.traits[tt.trait].img : null;
+    return `<button type="button" class="cicon" data-k="${i}" data-c="${D.units[u].cost}" aria-pressed="${g.includes(state.sel)}" title="${esc(c.title + (c.rating != null ? ` · ${c.rating} điểm` : '') + (g.length > 1 ? ` · ${g.length} bản` : ''))}">
+      ${stack}<span class="ring"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></span>
       <span class="tl" data-t="${c.tier}">${c.tier}</span>
-      ${badge ? `<span class="bd"><img${em ? ' class="e"' : ''} src="${badge}" alt=""></span>` : ''}
+      ${ems.length ? `<span class="ems">${ems.map((e) => `<img src="${emblemOfTrait.get(e.trait).img}" alt="">`).join('')}</span>` : badge ? `<span class="bd"><img src="${badge}" alt=""></span>` : ''}
     </button>`;
   }
 
   function renderTiers() {
     $('tiers').innerHTML = ['S', 'A', 'B', 'C'].map((t) => {
-      const idx = state.list.map((c, i) => [c, i]).filter(([c]) => c.tier === t);
-      if (!idx.length) return '';
+      const gs = state.groups.filter((g) => state.list[g[0]].tier === t);
+      if (!gs.length) return '';
       return `<section class="trow" data-t="${t}"><div class="tblock"><b>${t}</b><small>Hạng ${t}</small></div>
-        <div class="tbox">${idx.map(([c, i]) => compIcon(c, i)).join('')}</div></section>`;
+        <div class="tbox">${gs.map((g) => compIcon(state.list[g[0]], g[0], g)).join('')}</div></section>`;
     }).join('') || (state.loading ? '<div class="loading"><i></i>Đang tìm đội hình…</div>'
-      : (state.picked.length || state.locked.length || state.carry != null ? '<p class="none">Không tìm được đội phù hợp. Thử nới giới hạn ở mục Tùy chọn hoặc bỏ bớt tướng muốn có.</p>' : '<p class="none">Chọn ấn hoặc tướng ở cột bên trái.</p>'));
+      : (state.picked.length || state.locked.length || state.carry != null ? '<p class="none">Không tìm được đội phù hợp. Thử nới giới hạn ở mục Tùy chọn hoặc bỏ bớt tướng muốn có.</p>' : '<p class="none">Chọn ấn hoặc tướng ở cột bên trái rồi bấm “Tìm đội hình”.</p>'));
   }
 
   // Như trang xếp đội của TFT Academy: mốc đang kích tô màu, xếp cầu vồng > vàng > độc nhất (cam) > bạc > đồng;
@@ -714,17 +754,21 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 
   // Popup khi bấm vào một tộc/hệ: mô tả, mốc đang đạt (đậm), danh sách tướng có tộc/hệ đó
   function traitPopup(ti, n, anchor) {
+    const comp = anchor.closest('#detail, #zoom') ? state.list[state.sel] : null;
+    const have = new Set((comp?.units || []).map((u) => D.units[u].base || D.units[u].id));
+    const inComp = (i) => !comp || have.has(D.units[i].base || D.units[i].id) || have.has(D.units[i].id);
     closeTraitPopup();
     const tr = D.traits[ti];
     const cur = tr.bps.filter(([m]) => m <= n).pop()?.[0];
     const rows = (tr.rows || []).map((r) => `<span class="r${r.min === cur ? ' on' : ''}">${esc(r.text)}</span>`).join('');
-    const units = D.units.map((u, i) => i).filter((i) => !D.units[i].hidden && D.units[i].traits.includes(ti))
+    const byEmblem = new Set((comp?.emblems || []).filter((e) => e.trait === ti && e.unit != null).map((e) => e.unit));
+    const units = D.units.map((u, i) => i).filter((i) => !D.units[i].hidden && (D.units[i].traits.includes(ti) || byEmblem.has(i)))
       .sort((a, b) => D.units[a].cost - D.units[b].cost || D.units[a].name.localeCompare(D.units[b].name));
     const el = document.createElement('div');
     el.className = 'tpop'; el.id = 'tpop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', tr.name);
     el.innerHTML = `<div class="hd"><img src="${tr.img}" alt=""><b>${esc(tr.name)}</b></div>
       <div class="ds">${tr.desc ? `<span class="in">${esc(tr.desc)}</span>` : ''}${rows}</div>
-      ${units.length ? `<div class="us">${units.map((i) => `<img src="${D.units[i].img}" data-c="${D.units[i].cost}" alt="${esc(D.units[i].name)}" title="${esc(D.units[i].name)} · ${D.units[i].cost} vàng">`).join('')}</div>` : ''}`;
+      ${units.length ? `<div class="us">${units.map((i) => `<span class="uw"><img src="${D.units[i].img}" data-c="${D.units[i].cost}"${inComp(i) ? '' : ' class="off"'} alt="${esc(D.units[i].name)}" title="${esc(D.units[i].name)} · ${D.units[i].cost} vàng${byEmblem.has(i) ? ' · cầm ấn' : ''}">${byEmblem.has(i) ? `<img class="eb" src="${emblemOfTrait.get(ti).img}" alt="">` : ''}</span>`).join('')}</div>` : ''}`;
     document.body.appendChild(el);
     const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
     let x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
@@ -757,15 +801,10 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 
   function unitCell(u, c) {
     const unit = D.units[u];
-    const b = c.board(u);
-    const items = (b?.items || []).map((id) => {
-      const em = emblemById.get(id);
-      if (em) return `<img src="${em.img}" alt="" data-e="${em.trait}">`;
-      const it = D.items?.[id];
-      return it ? `<img src="${it.img}" alt="" title="${esc(it.name)}">` : '';
-    });
+    // Chỉ hiện ấn người chơi có (không hiện trang bị của đội mẫu)
+    const items = [];
     const mine = [];
-    for (const e of c.emblems.filter((x) => x.unit === u && !x.fixed)) {
+    for (const e of c.emblems.filter((x) => x.unit === u)) {
       const em = emblemOfTrait.get(e.trait);
       mine.push(`<img class="mine" src="${em.img}" alt="" data-e="${e.trait}">`);
     }
@@ -879,7 +918,9 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       </aside>
       <div class="right">
         <div class="rhead">
-          <span class="ctab"><span class="tl">${t}</span>${esc(c.title)}</span>${chips.join('')}
+          ${groupOf(state.sel).length > 1
+            ? `<div class="vtabs" role="tablist">${groupOf(state.sel).map((k) => `<button type="button" class="ctab vtab" role="tab" data-v="${k}" data-t="${state.list[k].tier}" aria-selected="${k === state.sel}"><span class="tl">${state.list[k].tier}</span>${esc(state.list[k].title)}</button>`).join('')}</div>`
+            : `<span class="ctab"><span class="tl">${t}</span>${esc(c.title)}</span>`}${chips.join('')}
           <div class="acts">
             <button type="button" class="pill y copy" data-code="${solver.teamCode(c.units)}">${icon('copy')}<span>Mã đội</span></button>
           </div>
@@ -898,17 +939,24 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     state.loading = false;
     $('reforge').hidden = true;
     $('path').hidden = true;
-    if (!traits.length && !locked.length && state.carry == null) { state.list = []; renderTiers(); renderDetail(); return; }
+    if (!traits.length && !locked.length && state.carry == null) { state.list = []; state.groups = []; renderTiers(); renderDetail(); return; }
     state.loading = true;
-    state.list = [];
+    $('go').disabled = true; $('go').textContent = 'Đang tìm…';
+    state.list = []; state.groups = [];
     renderTiers(); renderDetail();
-    const result = await solver.recommendAsync(traits, state.level, 10, (p) => {
+    const result = await solver.recommendAsync(traits, state.level, 14, (p) => {
       if (run === state.run) $('prog').style.width = Math.round((p.done / p.total) * 100) + '%';
     }, { locked, banned, carry: state.carry, dmg: state.dmg || null, maxUnused: state.maxUnused, maxUnique: state.maxUnique });
     if (run !== state.run) return;
     state.loading = false;
+    $('go').disabled = false; $('go').textContent = 'Tìm đội hình';
     $('prog').style.width = '0';
-    state.list = pickShown(result).map(fromRec);
+    const grouped = groupComps(result);
+    state.list = grouped.list.map(fromRec);
+    state.groups = grouped.groups;
+    assignAvatars(state.groups.map((g) => state.list[g[0]]));
+    // các bản trong nhóm dùng chung ảnh đại diện với bản đầu nhóm nếu có tướng đó
+    for (const g of state.groups) for (const i of g.slice(1)) { const a = state.list[g[0]].avatar; if (state.list[i].units.includes(a)) state.list[i].avatar = a; }
     renderTiers(); renderDetail();
     await runPlan(run, traits, { locked, banned, carry: state.carry, dmg: state.dmg || null, maxUnused: state.maxUnused, maxUnique: state.maxUnique });
     if (run !== state.run) return;
@@ -1039,18 +1087,47 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       <details class="more"><summary>Xem số liệu</summary><ul>${detail}</ul></details>`;
   }
 
-  // Chỉ hiện tối đa 4 đội: ưu tiên hạng S, A; chưa đủ 4 thì mới lấy thêm hạng B, rồi C
-  const MAX_SHOWN = 4;
-  function pickShown(list) {
+  // Hiện tối đa 4 NHÓM đội, mỗi nhóm tối đa 3 bản. Chung nhóm khi trùng "xương sống" với bản đầu nhóm:
+  // ≥ 2 trong 3 carry chính và ≥ 2 trong 3 tank chính (tướng kích hệ còn lại được phép khác).
+  // Nhóm xếp theo bản tốt nhất (ưu tiên hạng S, A, rồi B, C).
+  const MAX_GROUPS = 4, MAX_VARIANTS = 3, VARIANT_GAP = 25, CORE_MIN = 2;
+  function groupComps(list) {
     const order = ['S', 'A', 'B', 'C'];
-    return list.slice()
-      .sort((a, b) => (order.indexOf(a.tier) + 1 || 9) - (order.indexOf(b.tier) + 1 || 9) || (b.rating || 0) - (a.rating || 0))
-      .slice(0, MAX_SHOWN);
+    const sorted = list.slice()
+      .sort((a, b) => (order.indexOf(a.tier) + 1 || 9) - (order.indexOf(b.tier) + 1 || 9) || (b.rating || 0) - (a.rating || 0));
+    const key = (u) => D.units[u].base || D.units[u].id;
+    const carries = (c) => c.carries.filter((u) => !D.units[u].tank).slice(0, 3).map(key);
+    const tanks = (c) => c.units.filter((u) => D.units[u].tank).sort((a, b) => D.units[b].cost - D.units[a].cost).slice(0, 3).map(key);
+    const overlap = (x, y) => x.filter((k) => y.includes(k)).length;
+    const sameCore = (a, b) => overlap(carries(a), carries(b)) >= CORE_MIN && overlap(tanks(a), tanks(b)) >= CORE_MIN;
+    const groups = [];
+    for (const c of sorted) {
+      const g = groups.find((gr) => sameCore(gr[0], c));
+      // bản phụ phải đáng chơi: kém bản đầu nhóm không quá VARIANT_GAP điểm
+      if (g) { if (g.length < MAX_VARIANTS && (c.rating ?? 0) >= (g[0].rating ?? 0) - VARIANT_GAP) g.push(c); continue; }
+      if (groups.length < MAX_GROUPS) groups.push([c]);
+    }
+    const flat = groups.flat();
+    return { list: flat, groups: groups.map((g) => g.map((c) => flat.indexOf(c))) };
+  }
+  const groupOf = (i) => state.groups.find((g) => g.includes(i)) || [i];
+
+  // Đổi lựa chọn (ấn, cấp, tướng, tùy chọn): chỉ lưu và đánh dấu, chưa tính — bấm "Tìm đội hình" mới tính
+  function refresh() { renderPicker(); renderUnits(); save(); setStale(true); }
+  function setStale(on) {
+    state.dirty = on;
+    $('go').classList.toggle('pulse', on);
+    $('stale').hidden = !on || !state.list.length;
+    document.querySelector('.main').classList.toggle('stale', on && state.list.length > 0);
+  }
+  function search() {
+    setStale(false);
+    compute();
+    if (innerWidth <= 900) setRail(false);
   }
 
-  function refresh() { renderPicker(); renderUnits(); save(); compute(); }
-
   // ---------------- Sự kiện ----------------
+  $('go').addEventListener('click', search);
   $('emblems').addEventListener('click', (ev) => {
     const b = ev.target.closest('.emb');
     if (!b || b.disabled || state.picked.length >= MAX) return;
@@ -1196,6 +1273,8 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
   $('detail').addEventListener('click', (ev) => {
+    const vt = ev.target.closest('.vtab');
+    if (vt) { state.sel = +vt.dataset.v; renderTiers(); renderDetail(); return; }
     if (ev.target.closest('#zoom-open')) { openZoom(); return; }
     if (!ev.target.closest('#reset-pos')) return;
     state.pos.delete(compKey(state.list[state.sel]));
@@ -1300,6 +1379,6 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     }
   });
 
-  refresh();
+  renderPicker(); renderUnits(); compute();
 })();
 </script>
