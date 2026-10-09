@@ -186,6 +186,14 @@ details.opts[open] summary::after { content: "▴"; }
 .pills b { color: var(--ink); margin-left: 6px; }
 .headline { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; font: 400 clamp(30px, 3.4vw, 46px)/1 var(--display); text-transform: uppercase; }
 .headline .y { color: var(--yellow); }
+.views { display: flex; gap: 0; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; width: max-content; max-width: 100%; }
+.views button { height: 36px; padding: 0 18px; font-size: 14px; font-weight: 800; color: var(--dim); }
+.views button + button { border-left: 1px solid var(--line); }
+.views button[aria-selected="true"] { background: var(--yellow); color: #111; }
+.main.best-view .side, .main.best-view .stale-note { display: none !important; }
+.lvrow { --tc: var(--yellow); }
+.lvrow .tblock { background: linear-gradient(0deg, #3a2f05, #6b5608); }
+.lvrow .tblock b { color: var(--yellow); }
 .headline svg { width: 20px; height: 20px; fill: var(--yellow); }
 
 /* --- Hàng tier: mỗi đội là một icon lục giác --- */
@@ -539,7 +547,11 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
         <button type="button" class="pill y" id="open">Chọn ấn</button>
       </div>
       <div class="pills" id="pills"></div>
-      <div class="headline">Đội hình <svg><use href="#i-arrow"/></svg> <span class="y">Theo ấn</span></div>
+      <div class="headline">Đội hình <svg><use href="#i-arrow"/></svg> <span class="y" id="hl">Theo ấn</span></div>
+      <div class="views" role="tablist">
+        <button type="button" role="tab" data-view="emblem" aria-selected="true">Theo ấn</button>
+        <button type="button" role="tab" data-view="best" aria-selected="false">Đội mạnh nhất · không ấn</button>
+      </div>
       <div class="stale-note" id="stale" hidden>Đã đổi lựa chọn · bấm <b>Tìm đội hình</b> để xem kết quả mới</div>
       <div class="tiers" id="tiers"></div>
       <div class="bar" id="bar" hidden><i id="prog"></i></div>
@@ -563,6 +575,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 <script src="meta.js"></script>
 <script src="emblem-tiers.js"></script>
 <script src="scale.js"></script>
+<script src="best.js"></script>
 <script src="solver.js"></script>
 <script>
 (function () {
@@ -582,7 +595,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     .sort((a, b) => D.units[a].cost - D.units[b].cost || D.units[a].name.localeCompare(D.units[b].name, 'vi'));
 
   const sample = ['Ấn Đao Phủ'].map((n) => D.emblems.findIndex((e) => e.name === n)).filter((i) => i >= 0);
-  const state = { groups: [], picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: null, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
+  const state = { view: 'emblem', groups: [], picked: sample, locked: [], banned: [], carry: null, dmg: '', maxUnused: 3, maxUnique: null, unitMode: 'want', cost: 5, level: 9, run: 0, list: [], sel: 0, loading: false, pos: new Map() };
   try {
     const saved = JSON.parse(localStorage.getItem('tft-emblems') || 'null');
     if (saved && Array.isArray(saved.picked)) {
@@ -595,9 +608,10 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
       if ('maxUnused' in saved) state.maxUnused = saved.maxUnused;
       // v2: mặc định 'Bất kỳ' (giới hạn 3 cũ loại mất đội mạnh: tướng 5 vàng hầu hết có tộc/hệ độc nhất)
       if ('maxUnique' in saved && saved.v === 2) state.maxUnique = saved.maxUnique;
+      if (saved.view === 'best') state.view = 'best';
     }
   } catch (e) {}
-  const save = () => { try { localStorage.setItem('tft-emblems', JSON.stringify({ v: 2, picked: state.picked, locked: state.locked, banned: state.banned, carry: state.carry, dmg: state.dmg, maxUnused: state.maxUnused, maxUnique: state.maxUnique, level: state.level })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem('tft-emblems', JSON.stringify({ v: 2, view: state.view, picked: state.picked, locked: state.locked, banned: state.banned, carry: state.carry, dmg: state.dmg, maxUnused: state.maxUnused, maxUnique: state.maxUnique, level: state.level })); } catch (e) {} };
 
   const sm = M.sources?.stats || M.sources?.seemeta;
   $('pills').innerHTML = `<span>Bản<b>${esc(M.patch || '?')}</b></span><span>Mùa<b>${D.set}</b></span>` + (sm ? `<span title="${esc(sm.name + (sm.patch ? ' · bản ' + sm.patch : ''))}">Số liệu<b>${fmt(sm.matches)} trận</b></span>` : '');
@@ -724,6 +738,15 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   }
 
   function renderTiers() {
+    if (state.view === 'best') {
+      $('tiers').innerHTML = [8, 9, 10].map((L) => {
+        const gs = state.groups.filter((g) => state.list[g[0]].level === L);
+        if (!gs.length) return '';
+        return `<section class="trow lvrow"><div class="tblock"><b>${L}</b><small>Cấp ${L}</small></div>
+          <div class="tbox">${gs.map((g) => compIcon(state.list[g[0]], g[0], g)).join('')}</div></section>`;
+      }).join('') || '<div class="loading"><i></i>Đang tìm đội mạnh nhất…</div>';
+      return;
+    }
     $('tiers').innerHTML = ['S', 'A', 'B', 'C'].map((t) => {
       const gs = state.groups.filter((g) => state.list[g[0]].tier === t);
       if (!gs.length) return '';
@@ -1127,7 +1150,50 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   }
 
   // ---------------- Sự kiện ----------------
-  $('go').addEventListener('click', search);
+  // ---------- Chế độ "Đội mạnh nhất · không ấn": tính sẵn trong web/best.js (thiếu thì tự tính) ----------
+  const emblemView = { list: [], groups: [] };
+  async function showBest() {
+    const run = ++state.run;
+    state.list = []; state.groups = []; state.sel = 0;
+    renderTiers(); renderDetail();
+    const levels = {};
+    const pre = window.TFT_BEST?.levels;
+    for (const L of [8, 9, 10]) {
+      // điểm chỉ từ số liệu tướng + tộc/hệ (không cộng điểm "giống kiểu đội thật")
+      levels[L] = pre?.[L]
+        ? pre[L].map((c) => ({ units: c.units.map((id) => D.units.findIndex((u) => u.id === id)), total: c.total })).filter((c) => c.units.every((u) => u >= 0))
+        : await solver.bestComps(L, 6);
+      if (run !== state.run) return;
+    }
+    const list = [];
+    for (const L of [8, 9, 10]) {
+      const comps = levels[L].map((c) => ({ ...solver.evalComp(c.units, [], L), total: c.total, prior: null, level: L }));
+      const top = Math.max(1, ...comps.map((c) => c.total));
+      comps.sort((a, b) => b.total - a.total).slice(0, 4).forEach((c, k) => list.push({ ...c, tier: String(k + 1), rating: Math.round((100 * c.total) / top), pct: null, bestInSet: false }));
+    }
+    state.list = list.map(fromRec);
+    state.groups = state.list.map((c, i) => [i]);
+    assignAvatars(state.list);
+    renderTiers(); renderDetail();
+  }
+  function viewUI(v) {
+    state.view = v; save();
+    document.querySelectorAll('.views [data-view]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+    document.querySelector('.main').classList.toggle('best-view', v === 'best');
+    $('hl').textContent = v === 'best' ? 'Mạnh nhất' : 'Theo ấn';
+  }
+  function setView(v) {
+    if (v === state.view && (v === 'best' ? state.list.length : true)) return;
+    if (state.view === 'emblem') { emblemView.list = state.list; emblemView.groups = state.groups; emblemView.sel = state.sel; }
+    viewUI(v);
+    if (v === 'best') { setStale(false); showBest(); return; }
+    // quay lại "Theo ấn": dùng lại kết quả cũ, chưa có thì tìm
+    if (emblemView.list.length) { state.run++; state.list = emblemView.list; state.groups = emblemView.groups; state.sel = emblemView.sel || 0; renderTiers(); renderDetail(); setStale(state.dirty); }
+    else compute();
+  }
+  document.querySelector('.views').addEventListener('click', (ev) => { const b = ev.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
+  // Bấm tìm khi đang xem "Đội mạnh nhất": về lại "Theo ấn" rồi tìm
+  $('go').addEventListener('click', () => { if (state.view === 'best') viewUI('emblem'); search(); });
   $('emblems').addEventListener('click', (ev) => {
     const b = ev.target.closest('.emb');
     if (!b || b.disabled || state.picked.length >= MAX) return;
@@ -1379,6 +1445,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     }
   });
 
-  renderPicker(); renderUnits(); compute();
+  renderPicker(); renderUnits();
+  if (state.view === 'best') { state.view = 'emblem'; setView('best'); } else compute();
 })();
 </script>

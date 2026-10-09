@@ -1318,6 +1318,38 @@
       return { up8, up9, pick };
     }
 
+    // ---------- Đội mạnh nhất KHÔNG ấn ở cấp L ----------
+    // Chỉ dùng số liệu tướng + tộc/hệ (bộ chấm điểm của app): không đội mẫu (TFT Academy / kiểu đội MetaTFT),
+    // không điểm "giống kiểu đội thật". Tìm bằng beam rộng + mài đổi từng tướng + đổi cặp, đủ luật như gợi ý theo ấn.
+    async function bestComps(L, howMany = 6, onProgress) {
+      setLevel(L);
+      const rules = LEVEL_RULES[L];
+      const none = new Int8Array(NT);
+      const cfg = { maxUnused: 3, maxUnique: null };
+      const key = (u) => U[u].base || U[u].id;
+      const same = (a, b) => { const k = new Set(a.map(key)); return b.filter((u) => k.has(key(u))).length; };
+      const out = [];
+      const add = (units) => {
+        setLevel(L);
+        if (units.reduce((a, u) => a + slotsOf[u], 0) !== L) return;
+        if (units.filter((u) => tank[u]).length < rules.tank) return;
+        if (units.filter((u) => !tank[u] && U[u].cost >= rules.carryCost).length < rules.carry) return;
+        if (deadUnits(units, []).length || overCap(boardStats(units, []), cfg)) return;
+        const total = score(build(units), L, none, true);
+        const dup = out.findIndex((k) => same(k.units, units) >= L - 1);
+        if (dup >= 0) { if (out[dup].total < total) out[dup] = { units, total }; return; }
+        out.push({ units, total });
+      };
+      const algo = await suggestAsync([], L, 16, onProgress, { beamScale: 1, maxBig: 6 });
+      for (const c of algo) add(c.units);
+      out.sort((a, b) => b.total - a.total);
+      for (const c of out.slice(0, POLISH_TOP)) { await tick(); add(keepScore(c.units, [], L, new Set(), {}, POLISH_SWAPS).units); }
+      out.sort((a, b) => b.total - a.total);
+      for (const c of out.slice(0, PAIR_TOP)) { await tick(); add(pairPolish(c.units, [], L, new Set(), {})); }
+      out.sort((a, b) => b.total - a.total);
+      return out.slice(0, howMany);
+    }
+
     // Chấm một đội bất kỳ theo đúng cách xếp hạng gợi ý (để kiểm tra / so với đội người chơi tự xếp)
     function evalComp(units, emblemTraits, L) {
       setLevel(L);
@@ -1327,7 +1359,7 @@
       return { ...d, total, prior: pr && pr.share ? { avg: pr.comp.avg, share: pr.share, v: pr.v } : null,
         dead: deadUnits(units, emblemTraits).length, over: overCap(boardStats(units, emblemTraits), { maxUnused: 3, maxUnique: 3 }) };
     }
-    return { suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
+    return { suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
   }
 
   root.createSolver = createSolver;
