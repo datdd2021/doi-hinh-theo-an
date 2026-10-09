@@ -311,17 +311,16 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 @media (max-width: 600px) { .path .step { grid-template-columns: 1fr auto; } .path .us { grid-column: 1 / -1; grid-row: 2; } .path .note { grid-column: 1 / -1; } }
 .up5 .rows { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; }
 .up5 .r { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 12px; background: var(--card-2); }
-.up5 .r svg { width: 12px; height: 12px; fill: var(--dim); margin-bottom: 16px; }
+.up5 .r svg.arr { width: 12px; height: 12px; fill: var(--dim); margin-bottom: 16px; }
 .up5 .pu { position: relative; width: 42px; height: 44px; clip-path: var(--hex); background: var(--c1); display: grid; place-items: center; }
 .up5 .pu img { width: 86%; height: 86%; clip-path: var(--hex); object-fit: cover; }
 .up5 .pu[data-c="2"] { background: var(--c2); } .up5 .pu[data-c="3"] { background: var(--c3); } .up5 .pu[data-c="4"] { background: var(--c4); } .up5 .pu[data-c="5"] { background: var(--c5); }
 .up5 .un { display: grid; justify-items: center; gap: 3px; }
 .up5 .un i { font-style: normal; font-size: 11.5px; font-weight: 800; white-space: nowrap; }
-.up5 .out i { color: var(--dim); text-decoration: line-through; }
+.up5 .out i { color: var(--dim); }
 .up5 .out .pu { opacity: .75; }
 .up5 .r b { color: var(--cc2); font-size: 15px; }
 .up5 .r small { color: var(--dim); font-size: 12px; margin-left: -4px; }
-.up5 .copy { height: 26px; font-size: 12px; }
 .rf .more { margin-top: 8px; font-size: 12px; color: var(--dim); }
 .rf .more summary { cursor: pointer; font-weight: 800; }
 .rf .more ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
@@ -941,9 +940,8 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     const pts = (g) => Math.round(best ? (100 * g) / (c.top || c.total) : q ? (100 * g) / Math.max(1, q[100] - q[0]) : g);
     const pu = (u) => `<span class="un"><span class="pu" data-c="${D.units[u].cost}" data-u="${u}"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></span><i>${esc(baseName(u))}</i></span>`;
     return `<div class="box up5"><h4 title="Gặp tướng 5 vàng thì thay ai">Flex Units</h4><div class="rows">${ups.map((x) => `<div class="r">
-      ${pu(x.add)}<svg viewBox="0 0 24 24"><path d="M7 3l12 9-12 9z"/></svg><span class="out">${pu(x.remove)}</span>
-      <b>+${pts(x.gain)}</b><small>điểm</small>
-      <button type="button" class="pill y copy" data-code="${solver.teamCode(x.units)}">${icon('copy')}<span>Mã</span></button></div>`).join('')}</div></div>`;
+      <span class="out">${pu(x.remove)}</span><svg class="arr" viewBox="0 0 24 24"><path d="M7 3l12 9-12 9z"/></svg>${pu(x.add)}
+      <b>+${pts(x.gain)}</b><small>điểm</small></div>`).join('')}</div></div>`;
   }
   function renderDetail() {
     const c = state.list[state.sel];
@@ -1471,13 +1469,14 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   document.addEventListener('click', async (ev) => {
     const b = ev.target.closest('.copy[data-code]'); if (!b) return;
     const code = b.dataset.code, label = b.querySelector('span');
+    const text = label.dataset.t || (label.dataset.t = label.textContent);
     try {
       await navigator.clipboard.writeText(code);
       b.classList.add('ok'); b.querySelector('use').setAttribute('href', '#i-check'); label.textContent = 'Đã chép';
-      setTimeout(() => { b.classList.remove('ok'); b.querySelector('use').setAttribute('href', '#i-copy'); label.textContent = 'Mã đội'; }, 1600);
+      setTimeout(() => { b.classList.remove('ok'); b.querySelector('use').setAttribute('href', '#i-copy'); label.textContent = text; }, 1600);
     } catch (e) {
-      const row = b.closest('.rhead');
-      let box = row.querySelector('.code');
+      const row = b.closest('.rhead') || b.parentElement;
+      let box = row.querySelector(':scope > .code');
       if (!box) { box = document.createElement('input'); box.className = 'code'; box.readOnly = true; box.setAttribute('aria-label', 'Mã đội hình'); row.appendChild(box); }
       box.value = code; box.focus(); box.select(); label.textContent = 'Ctrl+C';
     }
