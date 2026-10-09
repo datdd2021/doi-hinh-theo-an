@@ -11,6 +11,8 @@ const T = (en) => { const i = D.traits.findIndex((t) => t.en === en); if (i < 0)
 const UN = (en) => { const i = D.units.findIndex((u) => u.en === en); if (i < 0) throw new Error('unit ' + en); return i; };
 const key = (u) => D.units[u].base || D.units[u].id; // các biến thể Lux tính là một
 
+const UI_DEFAULTS = { maxUnused: 3, maxUnique: null };
+
 const CASES = [
   { name: 'Thuật Sư + Đấu Sĩ + Thần Rừng (người chơi tự xếp)', emb: ['Spellweaver', 'Brawler', 'Elderwood'], L: 9,
     expect: ['Maokai', 'Taric', 'Amumu', 'Lux (Lunar)', 'Alune', 'Kennen', 'Gnar', 'Ezreal', 'Diana'], minSame: 8 },
@@ -26,7 +28,8 @@ const CASES = [
 (async () => {
   let fail = 0;
   for (const c of CASES) {
-    const res = await S.recommendAsync(c.emb.map(T), c.L, 10);
+    // Chạy đúng tùy chọn mặc định của giao diện (web/index.html: maxUnused 3, maxUnique Bất kỳ)
+    const res = await S.recommendAsync(c.emb.map(T), c.L, 10, null, UI_DEFAULTS);
     const top = res[0];
     const errs = [];
     if (!top) errs.push('không ra đội nào');
