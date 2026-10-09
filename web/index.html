@@ -940,7 +940,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     const q = best ? null : solver.scaleOf(8, ems.length);
     const pts = (g) => Math.round(best ? (100 * g) / (c.top || c.total) : q ? (100 * g) / Math.max(1, q[100] - q[0]) : g);
     const pu = (u) => `<span class="un"><span class="pu" data-c="${D.units[u].cost}" data-u="${u}"><img src="${D.units[u].img}" alt="${esc(D.units[u].name)}"></span><i>${esc(baseName(u))}</i></span>`;
-    return `<div class="box up5"><h4>Gặp tướng 5 vàng</h4><div class="rows">${ups.map((x) => `<div class="r">
+    return `<div class="box up5"><h4 title="Gặp tướng 5 vàng thì thay ai">Flex Units</h4><div class="rows">${ups.map((x) => `<div class="r">
       ${pu(x.add)}<svg viewBox="0 0 24 24"><path d="M7 3l12 9-12 9z"/></svg><span class="out">${pu(x.remove)}</span>
       <b>+${pts(x.gain)}</b><small>điểm</small>
       <button type="button" class="pill y copy" data-code="${solver.teamCode(x.units)}">${icon('copy')}<span>Mã</span></button></div>`).join('')}</div></div>`;
