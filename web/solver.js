@@ -1350,6 +1350,38 @@
       return out.slice(0, howMany);
     }
 
+    // ---------- Gặp tướng 5 vàng thì thay ai (như "Flex Units" của TFT Academy) ----------
+    // Đội cấp 8 không dựa vào tướng 5 vàng; nếu gặp một tướng 5 vàng (trừ Lux — gặp cũng khó đúng hệ) thì thay
+    // tướng nào để đội mạnh lên nhiều nhất. Ấn được gắn lại tự do. pure = chỉ số liệu (tab "Đội mạnh nhất").
+    function upgrades5(units, emblemTraits, L, opts = {}) {
+      setLevel(L);
+      const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++);
+      const key = (u) => U[u].base || U[u].id;
+      const have = new Set(units.map(key));
+      const ban = banMask(opts.banned || []);
+      const keep = new Set(opts.locked || []);
+      const val = (arr) => {
+        if (opts.pure) return score(build(arr), L, ek, true);
+        const d = describe(build(arr), emblemTraits, L);
+        const pr = compPrior(arr, emblemTraits);
+        return totalScore(arr, emblemTraits, L, d.emblems) + (pr ? pr.v : 0);
+      };
+      const base = val(units);
+      const out = [];
+      for (let u = 0; u < NU; u++) {
+        if (U[u].cost !== 5 || U[u].hidden || U[u].group === 'Lux' || ban[u] || have.has(key(u))) continue;
+        let best = null;
+        units.forEach((x, i) => {
+          if (keep.has(x) || slotsOf[x] !== slotsOf[u]) return;
+          const arr = units.slice(); arr[i] = u;
+          const v = val(arr);
+          if (!best || v > best.total) best = { add: u, remove: x, total: v, units: arr };
+        });
+        if (best && best.total > base) out.push({ ...best, gain: best.total - base });
+      }
+      return out.sort((a, b) => b.gain - a.gain).slice(0, opts.howMany || 3);
+    }
+
     // Chấm một đội bất kỳ theo đúng cách xếp hạng gợi ý (để kiểm tra / so với đội người chơi tự xếp)
     function evalComp(units, emblemTraits, L) {
       setLevel(L);
@@ -1359,7 +1391,7 @@
       return { ...d, total, prior: pr && pr.share ? { avg: pr.comp.avg, share: pr.share, v: pr.v } : null,
         dead: deadUnits(units, emblemTraits).length, over: overCap(boardStats(units, emblemTraits), { maxUnused: 3, maxUnique: 3 }) };
     }
-    return { suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
+    return { suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
   }
 
   root.createSolver = createSolver;
