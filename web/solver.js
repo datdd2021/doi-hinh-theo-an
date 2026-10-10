@@ -55,10 +55,6 @@
     10: { maxCost: 5, c5: 6, tank: 0, carryCost: 4, carry: 2, dpsMax: 9 },
   };
   const MISSING_TANK = 8;
-  // Lux có 9 dạng tộc/hệ, dạng nào xuất hiện là ngẫu nhiên → gặp đúng dạng mong muốn là hên xui.
-  // Khả năng gặp đúng dạng trong một ván: TẠM 30% (người chơi: "thấp lắm, cứ thử 30"; chưa có số liệu — cần kiểm chứng lại).
-  const LUX_HIT = 0.3;
-  const LUX_ALT_TOP = 4; // số đội đầu có Lux được tạo thêm bản không Lux
   const MISSING_CARRY = 6;
   const EXTRA_DPS = 1.5;
   const TIERS = ['S', 'A', 'B', 'C'];
@@ -905,32 +901,6 @@
         .some((t) => TR[t].kind !== 'unique' && tIdx[t][Math.min(MAX_COUNT, counts[t])] >= 0));
     }
 
-    // Rủi ro Lux: đội cần Lux đúng dạng X. Không gặp đúng dạng thì dùng phương án dự phòng tốt nhất cho ô đó
-    // (tướng khác, hoặc Lux dạng khác — tính trung bình vì dạng nào ra cũng ngẫu nhiên). Điểm kỳ vọng:
-    // điểm khi có X − (1 − LUX_HIT) × (điểm khi có X − điểm dự phòng).
-    function luxRisk(units, emblemTraits, L) {
-      const i = units.findIndex((u) => U[u].group === 'Lux' && U[u].base);
-      if (i < 0) return null;
-      setLevel(L);
-      const rules = LEVEL_RULES[L];
-      const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++);
-      const sc = (arr) => score(build(arr), L, ek, true);
-      const withX = sc(units);
-      const rest = units.filter((_, j) => j !== i);
-      let best = null;
-      for (let u = 0; u < NU; u++) {
-        if (U[u].hidden || U[u].group === 'Lux' || units.includes(u) || U[u].cost > rules.maxCost) continue;
-        if (groupBit[u] && rest.some((x) => groupBit[x] & groupBit[u])) continue;
-        const v = sc(rest.concat(u));
-        if (!best || v > best.v) best = { unit: u, v };
-      }
-      const others = U.map((x, k) => k).filter((k) => U[k].group === 'Lux' && U[k].base && k !== units[i]);
-      const anyLux = others.length ? others.reduce((a, k) => a + sc(rest.concat(k)), 0) / others.length : -Infinity;
-      const fb = !best || anyLux >= best.v ? { unit: null, v: anyLux } : best;
-      const loss = Math.max(0, withX - fb.v);
-      return { variant: units[i], hit: LUX_HIT, fallback: fb.unit, bestUnit: best ? best.unit : null, loss, penalty: (1 - LUX_HIT) * loss };
-    }
-    const withLux = (cand, emblemTraits, L) => { const r = luxRisk(cand.units, emblemTraits, L); if (r) { cand.total -= r.penalty; cand.lux = r; } return cand; };
     async function recommendAsync(emblemTraits, L, howMany = 10, onProgress, opts = {}) {
       const carry = opts.carry ?? null;
       const locked = (opts.locked || []).concat(carry != null && !(opts.locked || []).includes(carry) ? [carry] : []);
@@ -990,7 +960,6 @@
         const cand = { ...d, frame: c, known: true, level: L,
           total: totalScore(units, emblemTraits, L, d.emblems) + (c.source === 'academy' ? KNOWN_BONUS[c.tier] || 0 : 0) };
         const pr = compPrior(units, emblemTraits); if (pr) { cand.total += pr.v; cand.prior = { avg: pr.comp.avg, games: pr.comp.games, share: pr.share }; }
-        withLux(cand, emblemTraits, L);
         const dup = out.findIndex((k) => same(k, cand) >= L - 1);
         if (dup >= 0) { if (out[dup].total < cand.total) out[dup] = cand; continue; }
         out.push(cand);
@@ -1017,7 +986,6 @@
           if (!cl) return;
           const cand = { ...c, carries: cl, known: false, level: L, total: totalScore(c.units, emblemTraits, L, c.emblems) };
           const pr = compPrior(c.units, emblemTraits); if (pr) { cand.total += pr.v; cand.prior = { avg: pr.comp.avg, games: pr.comp.games, share: pr.share }; }
-          withLux(cand, emblemTraits, L);
           const dup = out.findIndex((k) => same(k, cand) >= L - 2);
           if (dup >= 0) { if (out[dup].total < cand.total) out[dup] = cand; return; }
           out.push(cand);
@@ -1039,19 +1007,6 @@
           const keep = new Set(locked.filter((u) => c.units.includes(u)));
           const p = pairPolish(c.units, emblemTraits, L, keep, { banned });
           if (p.length === c.units.length && p.every((u) => c.units.includes(u))) continue;
-          addAlgo(describe(build(p), emblemTraits, L));
-        }
-        out.sort((a, b) => b.total - a.total);
-        // Lux hên xui: với vài đội đầu có Lux, thêm bản KHÔNG Lux (thay bằng tướng dự phòng rồi mài lại) để so công bằng
-        const noLux = banned.concat(U.map((x, k) => k).filter((k) => U[k].group === 'Lux'));
-        for (const c of out.slice(0, LUX_ALT_TOP)) {
-          if (!c.lux || locked.some((u) => U[u].group === 'Lux')) continue;
-          await tick();
-          const sub = c.lux.fallback ?? c.lux.bestUnit;
-          if (sub == null) continue;
-          const start = c.units.map((u) => (u === c.lux.variant ? sub : u));
-          const keep = new Set(locked.filter((u) => start.includes(u)));
-          const p = keepScore(start, emblemTraits, L, keep, { banned: noLux }, POLISH_SWAPS).units;
           addAlgo(describe(build(p), emblemTraits, L));
         }
         out.sort((a, b) => b.total - a.total);
@@ -1252,8 +1207,7 @@
       const d = describe(build(units), emblemTraits, L, { fixed, keepOrder: true });
       let total = totalScore(units, emblemTraits, L, d.emblems);
       const pr = compPrior(units, emblemTraits); if (pr) total += pr.v;
-      const lux = luxRisk(units, emblemTraits, L); if (lux) total -= lux.penalty;
-      return { units, lux, emblems: d.emblems, traits: d.traits, carries: d.carries, total, rating: toRating(total, L, k), pct: pctOf(total, L, k), level: L,
+      return { units, emblems: d.emblems, traits: d.traits, carries: d.carries, total, rating: toRating(total, L, k), pct: pctOf(total, L, k), level: L,
         levelling: pr?.share ? pr.comp.levelling || null : null,
         fixed: new Map(d.emblems.filter((e) => e.unit != null).map((e) => [e.trait, e.unit])) };
     }
@@ -1381,11 +1335,10 @@
         if (units.filter((u) => tank[u]).length < rules.tank) return;
         if (units.filter((u) => !tank[u] && U[u].cost >= rules.carryCost).length < rules.carry) return;
         if (deadUnits(units, []).length || overCap(boardStats(units, []), cfg)) return;
-        const lux = luxRisk(units, [], L);
-        const total = score(build(units), L, none, true) - (lux ? lux.penalty : 0);
+        const total = score(build(units), L, none, true);
         const dup = out.findIndex((k) => same(k.units, units) >= L - 1);
-        if (dup >= 0) { if (out[dup].total < total) out[dup] = { units, total, lux }; return; }
-        out.push({ units, total, lux });
+        if (dup >= 0) { if (out[dup].total < total) out[dup] = { units, total }; return; }
+        out.push({ units, total });
       };
       const algo = await suggestAsync([], L, 16, onProgress, { beamScale: 1, maxBig: 6 });
       for (const c of algo) add(c.units);
@@ -1435,11 +1388,10 @@
       const d = describe(build(units), emblemTraits, L);
       let total = totalScore(units, emblemTraits, L, d.emblems);
       const pr = compPrior(units, emblemTraits); if (pr) total += pr.v;
-      const lux = luxRisk(units, emblemTraits, L); if (lux) total -= lux.penalty;
-      return { ...d, total, lux, prior: pr && pr.share ? { avg: pr.comp.avg, share: pr.share, v: pr.v } : null,
+      return { ...d, total, prior: pr && pr.share ? { avg: pr.comp.avg, share: pr.share, v: pr.v } : null,
         dead: deadUnits(units, emblemTraits).length, over: overCap(boardStats(units, emblemTraits), { maxUnused: 3, maxUnique: 3 }) };
     }
-    return { LUX_HIT, suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
+    return { suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
   }
 
   root.createSolver = createSolver;
