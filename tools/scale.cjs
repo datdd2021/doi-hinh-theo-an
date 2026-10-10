@@ -18,7 +18,7 @@ const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const groups = { 1: E.map((t) => [t]) };
 for (const k of [2, 3, 4]) groups[k] = Array.from({ length: N }, () => Array.from({ length: k }, () => E[Math.floor(rnd() * E.length)]));
 (async () => {
-  const out = { updated: new Date().toISOString().slice(0, 10), sets: N, levels: {}, top: {} };
+  const out = { updated: new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10) /* ngày theo giờ Việt Nam (UTC+7) */, sets: N, levels: {}, top: {} };
   const t0 = Date.now();
   for (const L of [7, 8, 9, 10]) {
     out.levels[L] = {}; out.top[L] = {};

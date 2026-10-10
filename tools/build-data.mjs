@@ -250,7 +250,7 @@ async function main() {
     plannerSet: SET_MUTATOR,
     mutator: SET_MUTATOR,
     version: meta.version,
-    updated: new Date().toISOString().slice(0, 10),
+    updated: new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10) /* ngày theo giờ Việt Nam (UTC+7) */,
     traits,
     units,
     emblems,

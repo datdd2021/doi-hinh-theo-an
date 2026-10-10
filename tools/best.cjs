@@ -9,7 +9,7 @@ const { createSolver } = require('../web/solver.js');
 const D = window.TFT_DATA;
 const S = createSolver(D, window.TFT_META);
 (async () => {
-  const out = { updated: new Date().toISOString().slice(0, 10), levels: {} };
+  const out = { updated: new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10) /* ngày theo giờ Việt Nam (UTC+7) */, levels: {} };
   for (const L of [8, 9, 10]) {
     const r = await S.bestComps(L, 6);
     out.levels[L] = r.map((c) => ({ units: c.units.map((u) => D.units[u].id), total: +c.total.toFixed(2) }));
