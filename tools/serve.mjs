@@ -14,7 +14,7 @@ createServer(async (req, res) => {
   if (!file.startsWith(WEB)) { res.writeHead(403).end(); return; }
   try {
     const body = await readFile(file);
-    res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream' }).end(body);
+    res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }).end(body); // luôn lấy bản mới khi đang sửa
   } catch {
     res.writeHead(404).end('Không tìm thấy');
   }
