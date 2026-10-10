@@ -79,12 +79,20 @@
 
   function createSolver(data, meta, scale = root.TFT_SCALE) {
     meta = meta || {};
-    const U = data.units;
+    // Lux là Ô LINH HOẠT (người chơi: "luôn chừa 1 chỗ cho Lux, xác định hệ sau"; dạng Lux gặp được là ngẫu nhiên).
+    // Thuật toán dùng Lux gốc — chỉ là một tướng 5 vàng mạnh, không mang tộc/hệ — thay cho 9 dạng Lux;
+    // dạng nào hợp đội thì xem luxForms ("Lux nên lấy dạng").
+    const LUX_BASE_ID = (data.units.find((u) => !u.base && data.units.some((v) => v.base === u.id)) || {}).id;
+    const U = data.units.map((u) => (u.id === LUX_BASE_ID ? { ...u, hidden: false, flex: true }
+      : LUX_BASE_ID && u.base === LUX_BASE_ID ? { ...u, hidden: true } : u));
     const TR = data.traits;
     const NT = TR.length;
     const NU = U.length;
     const unitIdx = new Map(U.map((u, i) => [u.id, i]));
     const statId = (u) => U[u].base || U[u].id; // Lux biến thể dùng số liệu của Lux gốc
+    const luxBase = LUX_BASE_ID ? unitIdx.get(LUX_BASE_ID) : -1;
+    const isLuxVar = (u) => luxBase >= 0 && U[u].base === LUX_BASE_ID;
+    const toBase = (u) => (isLuxVar(u) ? luxBase : u);
 
     const tank = U.map((u) => (u.tank ? 1 : 0));
     const slotsOf = U.map((u) => u.slots || 1);
@@ -319,6 +327,7 @@
       if (final && backU.length && !carriesFull) s -= NO_FULL_CARRY;
       for (const u of st.units) {
         const unit = U[u];
+        if (unit.flex) continue;
         let alive = false;
         for (const t of unit.traits) if (TR[t].kind !== 'unique' && tIdx[t][eff[t]] >= 0) { alive = true; break; }
         if (!alive) s -= DEAD_UNIT * ramp;
@@ -644,7 +653,7 @@
       const mine = emblemTraits.length ? build(units).counts : null;
       let best = null;
       for (const c of mtComps) {
-        const share = c.board.filter((b) => have.has(b.id)).length / c.board.length;
+        const share = c.board.filter((b) => { const i = unitIdx.get(b.id); return have.has(i == null ? b.id : U[i].base || U[i].id); }).length / c.board.length;
         if (share < COMP_MIN_SHARE) continue;
         // Ấn đẩy tộc/hệ lên mốc khác kiểu đội thật (vd 5 Mặt Trăng thay vì 3) thì không còn là cùng kiểu đội
         if (mine) {
@@ -748,6 +757,7 @@
       let cur = c.unitsI.filter((u) => !ban[u] && (U[u].cost <= rules.maxCost || locked.includes(u)));
       // Lux gốc (không mang tộc/hệ) đổi sang bản Lux hợp với đội nhất
       cur = cur.map((u) => {
+        if (isLuxVar(u)) return luxBase;
         if (!U[u].hidden) return u;
         const opts = U.map((x, i) => i).filter((i) => U[i].base === U[u].id && !ban[i]);
         let best = u, bestS = -Infinity;
@@ -897,11 +907,12 @@
       for (const p of placed) if (p.unit != null) counts[p.trait]++;
       const holderTraits = new Map();
       for (const p of placed) if (p.unit != null) holderTraits.set(p.unit, [...(holderTraits.get(p.unit) || []), p.trait]);
-      return units.filter((u) => !U[u].traits.concat(holderTraits.get(u) || [])
+      return units.filter((u) => !U[u].flex && !U[u].traits.concat(holderTraits.get(u) || [])
         .some((t) => TR[t].kind !== 'unique' && tIdx[t][Math.min(MAX_COUNT, counts[t])] >= 0));
     }
 
     async function recommendAsync(emblemTraits, L, howMany = 10, onProgress, opts = {}) {
+      opts = { ...opts, locked: (opts.locked || []).map(toBase), banned: (opts.banned || []).map(toBase), carry: opts.carry != null ? toBase(opts.carry) : opts.carry };
       const carry = opts.carry ?? null;
       const locked = (opts.locked || []).concat(carry != null && !(opts.locked || []).includes(carry) ? [carry] : []);
       const banned = opts.banned || [];
@@ -1382,6 +1393,31 @@
       return out.sort((a, b) => b.gain - a.gain).slice(0, opts.howMany || 3);
     }
 
+    // ---------- Lux nên lấy dạng ----------
+    function luxForms(units, emblemTraits, L, opts = {}) {
+      const i = units.indexOf(luxBase);
+      if (i < 0) return [];
+      setLevel(L);
+      const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++);
+      const val = (arr) => {
+        if (opts.pure) return score(build(arr), L, ek, true);
+        const d = describe(build(arr), emblemTraits, L);
+        const pr = compPrior(arr, emblemTraits);
+        return totalScore(arr, emblemTraits, L, d.emblems) + (pr ? pr.v : 0);
+      };
+      const base = val(units);
+      const out = [];
+      for (let v = 0; v < NU; v++) {
+        if (!isLuxVar(v)) continue;
+        const arr = units.slice(); arr[i] = v;
+        const t = U[v].traits.find((x) => TR[x].kind !== 'unique');
+        const d = describe(build(arr), emblemTraits, L);
+        const tr = d.traits.find((x) => x.trait === t);
+        out.push({ unit: v, trait: t, count: tr ? tr.count : 0, active: !!(tr && tr.active), gain: val(arr) - base, units: arr });
+      }
+      return out.sort((a, b) => b.gain - a.gain);
+    }
+
     // Chấm một đội bất kỳ theo đúng cách xếp hạng gợi ý (để kiểm tra / so với đội người chơi tự xếp)
     function evalComp(units, emblemTraits, L) {
       setLevel(L);
@@ -1391,7 +1427,7 @@
       return { ...d, total, prior: pr && pr.share ? { avg: pr.comp.avg, share: pr.share, v: pr.v } : null,
         dead: deadUnits(units, emblemTraits).length, over: overCap(boardStats(units, emblemTraits), { maxUnused: 3, maxUnique: 3 }) };
     }
-    return { suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
+    return { luxForms, luxBase, suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
   }
 
   root.createSolver = createSolver;

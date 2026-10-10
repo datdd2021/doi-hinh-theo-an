@@ -321,6 +321,9 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 .up5 .out .pu::after { content: ""; position: absolute; left: 14%; right: 14%; top: 50%; height: 2px; background: var(--s2); transform: rotate(-35deg); box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
 .up5 .out .pu { opacity: .75; }
 .up5 .r b { color: var(--cc2); font-size: 15px; }
+.luxbox .lx { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; padding: 3px 8px; border-radius: 8px; background: var(--bg-2); }
+.luxbox .lx img { width: 16px; height: 16px; }
+.luxnote { margin: 0; text-align: center; font-size: 12.5px; color: var(--dim); }
 .up5 .r small { color: var(--dim); font-size: 12px; margin-left: -4px; }
 .rf .more { margin-top: 8px; font-size: 12px; color: var(--dim); }
 .rf .more summary { cursor: pointer; font-weight: 800; }
@@ -931,6 +934,25 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   }
 
   // Đội cấp 8 không dựa vào tướng 5 vàng; "Gặp tướng 5 vàng": gặp thì thay ai, đội mạnh lên bao nhiêu (kế hoạch viết sẵn)
+  // Đổi điểm thô sang thang 0–100 đang hiển thị của đội
+  function ptsOf(c, g) {
+    if (state.view === 'best') return Math.round((100 * g) / (c.top || c.total || 1));
+    const q = solver.scaleOf(c.level, c.emblems.length);
+    return Math.round(q ? (100 * g) / Math.max(1, q[100] - q[0]) : g);
+  }
+  // Lux là ô linh hoạt: đội tính với Lux không tộc/hệ; đây là các dạng Lux đáng lấy nếu gặp (dạng ra ngẫu nhiên)
+  const LUX_MIN_PTS = 2; // chỉ hiện dạng làm đội mạnh thêm ít nhất chừng này điểm
+  function luxFormsHtml(c) {
+    if (!c.units.includes(solver.luxBase)) return '';
+    const forms = solver.luxForms(c.units, c.emblems.map((e) => e.trait), c.level, { pure: state.view === 'best' })
+      .map((x) => ({ ...x, pts: ptsOf(c, x.gain) })).filter((x) => x.pts >= LUX_MIN_PTS).slice(0, 4);
+    const rows = forms.length ? forms.map((x) => `<div class="r">
+        <span class="un"><span class="pu" data-c="5" data-u="${x.unit}"><img src="${D.units[x.unit].img}" alt="${esc(D.units[x.unit].name)}"></span><i>${esc(D.traits[x.trait].name)}</i></span>
+        <span class="lx">${x.active ? `<img src="${D.traits[x.trait].img}" alt="">${x.count} ${esc(D.traits[x.trait].name)}` : esc(D.traits[x.trait].name)}</span>
+        <b>+${x.pts}</b><small>điểm</small></div>`).join('')
+      : '<p class="luxnote">Dạng nào cũng được: không dạng Lux nào làm đội mạnh thêm đáng kể</p>';
+    return `<div class="box up5 luxbox"><h4 title="Dạng Lux ra ngẫu nhiên — đội đã tính với Lux không tộc/hệ">Lux nên lấy dạng</h4><div class="rows">${rows}</div></div>`;
+  }
   function up5Html(c) {
     if (c.level !== 8 || c.total == null) return '';
     const best = state.view === 'best';
@@ -985,7 +1007,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
           </div>
         </div>
         <div class="box"><div class="board">${c.units.map((u) => unitCell(u, c)).join('')}</div></div>
-        ${up5Html(c)}
+        ${up5Html(c)}${luxFormsHtml(c)}
         <div class="box" id="boardbox"><div class="boxh"><h4>Vị trí xếp</h4><button type="button" class="reset" id="reset-pos" ${state.pos.has(compKey(c)) ? '' : 'hidden'}>Đặt lại</button><button type="button" class="pill zbtn" id="zoom-open">Phóng to</button></div>${boardHtml(c)}</div>
       </div>
     </div>`;
