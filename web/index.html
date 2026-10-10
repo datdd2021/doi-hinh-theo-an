@@ -639,7 +639,8 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   const save = () => { try { localStorage.setItem('tft-emblems', JSON.stringify({ v: 2, view: state.view, picked: state.picked, locked: state.locked, banned: state.banned, carry: state.carry, dmg: state.dmg, maxUnused: state.maxUnused, maxUnique: state.maxUnique, level: state.level })); } catch (e) {} };
 
   const sm = M.sources?.stats || M.sources?.seemeta;
-  $('pills').innerHTML = `<span>Bản<b>${esc(M.patch || '?')}</b></span><span>Mùa<b>${D.set}</b></span>` + (sm ? `<span title="${esc(sm.name + (sm.patch ? ' · bản ' + sm.patch : ''))}">Số liệu<b>${fmt(sm.matches)} trận</b></span>` : '');
+  $('pills').innerHTML = `<span>Bản<b>${esc(M.patch || '?')}</b></span><span>Mùa<b>${D.set}</b></span>` + (sm ? `<span title="${esc(sm.name + (sm.patch ? ' · bản ' + sm.patch : ''))}">Số liệu<b>${fmt(sm.matches)} trận</b></span>` : '')
+    + (M.updated ? `<span title="Ngày lấy số liệu mới nhất (${esc(sm?.range || '')})">Cập nhật<b>${M.updated.split('-').reverse().join('/')}</b></span>` : '');
   $('src').textContent = 'Trang do người chơi làm, không liên kết với Riot Games.';
   const emblemStat = (e) => M.emblems?.[D.traits[e.trait].id];
   // Đánh giá ấn của app (tools/emblem-tiers.cjs): hạng + lời khuyên
