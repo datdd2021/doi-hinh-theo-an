@@ -615,6 +615,8 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
   const MAX = 4, MAX_UNITS = 4, MAX_BANS = 12;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // "2026-10-11 03:05" (giờ Việt Nam) → "03:05 · 11/10/2026"; bản cũ chỉ có ngày thì hiện ngày
+  const fmtUpdated = (s) => { const [d, t] = String(s).split(' '); return (t ? t + ' · ' : '') + d.split('-').reverse().join('/'); };
   const fmt = (n) => Number(n).toLocaleString('vi-VN');
   const icon = (id) => `<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
   const short = (e) => e.name.replace(/^Ấn\s+/, '');
@@ -648,7 +650,7 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
 
   const sm = M.sources?.stats || M.sources?.seemeta;
   $('pills').innerHTML = `<span>Bản<b>${esc(M.patch || '?')}</b></span><span>Mùa<b>${D.set}</b></span>` + (sm ? `<span title="${esc(sm.name + (sm.patch ? ' · bản ' + sm.patch : ''))}">Số liệu<b>${fmt(sm.matches)} trận</b></span>` : '')
-    + (M.updated ? `<span title="Ngày lấy số liệu mới nhất (${esc(sm?.range || '')})">Cập nhật<b>${M.updated.split('-').reverse().join('/')}</b></span>` : '');
+    + (M.updated ? `<span title="Lúc lấy số liệu mới nhất, giờ Việt Nam (${esc(sm?.range || '')})">Cập nhật<b>${fmtUpdated(M.updated)}</b></span>` : '');
   $('src').textContent = 'Trang do người chơi làm, không liên kết với Riot Games.';
   const emblemStat = (e) => M.emblems?.[D.traits[e.trait].id];
   // Đánh giá ấn của app (tools/emblem-tiers.cjs): hạng + lời khuyên
@@ -1228,9 +1230,13 @@ button.trait:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2
     const pre = window.TFT_BEST?.levels;
     for (const L of [8, 9, 10]) {
       // điểm chỉ từ số liệu tướng + tộc/hệ (không cộng điểm "giống kiểu đội thật")
-      levels[L] = pre?.[L]
-        ? pre[L].map((c) => ({ units: c.units.map((id) => D.units.findIndex((u) => u.id === id)), total: c.total })).filter((c) => c.units.every((u) => u >= 0))
-        : await solver.bestComps(L, 6, null, { banned: state.banned });
+      // bảng tính sẵn đã loại Lux; tướng khác trong Loại trừ thì bỏ các đội có tướng đó
+      const banned = new Set(state.banned);
+      const fromPre = pre?.[L]
+        ? pre[L].map((c) => ({ units: c.units.map((id) => D.units.findIndex((u) => u.id === id)), total: c.total }))
+          .filter((c) => c.units.every((u) => u >= 0 && !banned.has(u)))
+        : [];
+      levels[L] = fromPre.length ? fromPre : await solver.bestComps(L, 6, null, { banned: state.banned });
       if (run !== state.run) return;
     }
     const list = [];

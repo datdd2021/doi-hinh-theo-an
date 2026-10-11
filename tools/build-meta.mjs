@@ -269,7 +269,7 @@ async function main() {
   const roles = Object.fromEntries(champs.filter((c) => known.has(c.apiName)).map((c) => [c.apiName, c.role || '']));
 
   const out = {
-    updated: new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10) /* ngày theo giờ Việt Nam (UTC+7) */,
+    updated: new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 16).replace('T', ' ') /* ngày giờ lấy số liệu theo giờ Việt Nam (UTC+7), vd 2026-10-11 03:05 */,
     patch: patchRec?.patch || '',
     sources: {
       academy: { name: 'TFT Academy', url: 'https://tftacademy.com/tierlist/comps', patch: patchRec?.patch || '' },

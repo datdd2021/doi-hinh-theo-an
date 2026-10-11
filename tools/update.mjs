@@ -13,4 +13,5 @@ execFileSync(process.execPath, [join(here, 'emblem-tiers.cjs')], { stdio: 'inher
 run('check-counts.cjs'); // đối chiếu cách đếm tộc/hệ đặc biệt với đội thật
 run('best.cjs');         // đội mạnh nhất không ấn (tab "Đội mạnh nhất")
 run('scale.cjs');        // thang điểm chung cho mọi bộ ấn (tier tuyệt đối), ~15 phút
-try { run('regress.cjs'); } catch (e) { console.log('Có trường hợp kiểm tra chưa đạt (xem ở trên)'); } // các đội chuẩn người chơi đã xác nhận
+// Trên GitHub Actions bộ kiểm tra chạy ở bước riêng (không đạt thì không lưu) → không chạy lần 2 ở đây
+if (!process.env.GITHUB_ACTIONS) try { run('regress.cjs'); } catch (e) { console.log('Có trường hợp kiểm tra chưa đạt (xem ở trên)'); } // các đội chuẩn người chơi đã xác nhận

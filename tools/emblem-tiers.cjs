@@ -48,7 +48,8 @@ const adj = (avg, g, prior = PRIOR, k = K) => (avg == null || !g || g < MIN ? pr
     const holderA = r.bestHolder ? r.bestHolder.a : PRIOR;
     const lvA = r.bestLv ? r.bestLv.a : PRIOR;
     const team = maxTop > minTop ? (r.topScore - minTop) / (maxTop - minTop) : 0.5;
-    r.score = 40 * (PRIOR - r.ownAvg) + 25 * (PRIOR - holderA) + 15 * (PRIOR - lvA) + 20 * team * r.usefulRate;
+    // (tỉ lệ "lên mốc trong đội gợi ý" gần như luôn 100% nên không dùng để chấm, chỉ in ra để theo dõi)
+    r.score = 40 * (PRIOR - r.ownAvg) + 25 * (PRIOR - holderA) + 15 * (PRIOR - lvA) + 20 * team;
   }
   rows.sort((a, b) => b.score - a.score);
   const n = rows.length;

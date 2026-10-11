@@ -637,6 +637,7 @@
       while (!r.done) {
         onProgress?.(r.value);
         await tick();
+        setLevel(L); // trong lúc nghỉ, phép tính khác (cấp khác) có thể đã đổi cấp đang tính
         r = it.next();
       }
       return r.value;
@@ -1010,6 +1011,7 @@
       if (!opts.quick) {
         const rules = LEVEL_RULES[L];
         const algo = await suggestAsync(emblemTraits, L, 8, onProgress, { locked, banned, beamScale: 0.35, maxBig: 2 });
+        setLevel(L);
         const addAlgo = (c) => {
           if (c.units.reduce((a, u) => a + slotsOf[u], 0) !== L) return;
           if (c.units.filter((u) => tank[u]).length < rules.tank) return;
