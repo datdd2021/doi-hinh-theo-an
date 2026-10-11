@@ -172,6 +172,22 @@
       const r = owners.filter((u) => u.tank).length / owners.length;
       return r >= 0.6 ? 'tank' : r <= 0.3 ? 'damage' : 'flex';
     });
+    // Kiểu sát thương (vai trò TFT Academy "Attack …" = đánh thường, "Magic …" = kỹ năng). Hệ thuộc một kiểu khi TẤT CẢ
+    // tướng không phải tank của hệ (≥ 3 tướng) cùng kiểu đó (vd Liên Kích, Thợ Săn = đánh thường; Thuật Sư = kỹ năng);
+    // hệ lẫn hai kiểu (Thần Rừng, Mặt Trăng…) không xét. Ấn hệ đánh thường trên tướng kỹ năng (và ngược lại) là sai vai trò.
+    const dmgOf = (u) => (/^Attack/.test(U[u].role || '') ? 'AD' : /^Magic/.test(U[u].role || '') ? 'AP' : null);
+    const emblemDmg = TR.map((t, ti) => {
+      const kinds = U.map((u, i) => i).filter((i) => !U[i].hidden && !U[i].base && !U[i].tank && U[i].traits.includes(ti)).map(dmgOf);
+      return kinds.length >= 3 && kinds.every((k) => k && k === kinds[0]) ? kinds[0] : null;
+    });
+    // Tướng có hợp vai trò để cầm ấn không (dùng cả cho bảng đánh giá ấn)
+    function holderRoleOk(t, u) {
+      const kind = emblemKind[t];
+      if (kind === 'damage' && tank[u]) return false;
+      if (kind === 'tank' && !tank[u] && (U[u].range || 1) >= 3) return false;
+      if (emblemDmg[t] && !tank[u] && dmgOf(u) && dmgOf(u) !== emblemDmg[t]) return false;
+      return true;
+    }
     const emblemItemTrait = new Map((data.emblems || []).map((e) => [e.id, e.trait]));
     const academyPlaced = new Map(); // "trait|unitId" -> số đội TFT Academy đặt ấn đó cho tướng đó
     for (const c of meta.comps || []) {
@@ -202,6 +218,8 @@
       if (kind === 'damage' && tank[u]) s -= HOLDER_WRONG_ROLE;
       // Ấn tank (Dũng Sĩ, Vệ Quân…) trên tướng hàng sau (đánh xa, không phải tank) thì vô dụng; tướng cận chiến không phải tank chỉ trừ nhẹ
       if (kind === 'tank' && !tank[u]) s -= (U[u].range || 1) >= 3 ? HOLDER_WRONG_ROLE : 3;
+      // Ấn hệ đánh thường trên tướng kỹ năng (vd Liên Kích cho Alune) hoặc ngược lại
+      if (emblemDmg[t] && !tank[u] && dmgOf(u) && dmgOf(u) !== emblemDmg[t]) s -= HOLDER_WRONG_ROLE;
       s += HOLDER_COST_W * (U[u].cost - 3);
       return s;
     }
@@ -1437,7 +1455,7 @@
       return { ...d, total, prior: pr && pr.share ? { avg: pr.comp.avg, share: pr.share, v: pr.v } : null,
         dead: deadUnits(units, emblemTraits).length, over: overCap(boardStats(units, emblemTraits), { maxUnused: 3, maxUnique: 3 }) };
     }
-    return { luxForms, luxBase, suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
+    return { holderRoleOk, luxForms, luxBase, suggest, suggestAsync, rankMeta, recommendAsync, reforgeAdvice, planAsync, bestComps, upgrades5, teamCode, scaleOf, evalComp, LEVEL_RULES, MIN_GAMES, _score: (units, emblemTraits, L) => { setLevel(L); const ek = new Int8Array(NT); emblemTraits.forEach((t) => ek[t]++); return score(build(units), L, ek, true); } };
   }
 
   root.createSolver = createSolver;

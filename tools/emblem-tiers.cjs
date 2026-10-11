@@ -10,6 +10,13 @@ const { createSolver } = require('../web/solver.js');
 const D = window.TFT_DATA, M = window.TFT_META;
 const S = createSolver(D, M);
 const PRIOR = 4.5, K = 1500, MIN = 300;
+// Như mặc định giao diện: Lux bị loại (dạng ra ngẫu nhiên) → không tính Lux là người cầm, không dùng Lux trong đội gợi ý
+const LUX_ID = D.units[S.luxBase]?.id;
+const isLux = (id) => { const u = D.units.find((x) => x.id === id); return !!u && (u.id === LUX_ID || u.base === LUX_ID); };
+// Người cầm phải hợp vai trò như khi app đặt ấn (ấn sát thương không cho tank, ấn tank không cho hàng sau,
+// ấn hệ đánh thường không cho tướng kỹ năng và ngược lại)
+const roleOk = (t, id) => { const u = D.units.findIndex((x) => x.id === id); return u < 0 || S.holderRoleOk(t, u); };
+const UI_DEFAULTS = { maxUnused: 3, maxUnique: null, banned: [S.luxBase] };
 const adj = (avg, g, prior = PRIOR, k = K) => (avg == null || !g || g < MIN ? prior : (g * avg + k * prior) / (g + k));
 
 (async () => {
@@ -20,7 +27,7 @@ const adj = (avg, g, prior = PRIOR, k = K) => (avg == null || !g || g < MIN ? pr
     const st = M.emblems?.[tr.id] || {};
     const ownAvg = adj(st.avg, st.games);
     // người cầm tốt nhất (đủ mẫu)
-    const holders = (st.holders || []).filter((h) => h.games >= MIN).map((h) => ({ ...h, a: adj(h.avg, h.games, st.avg ?? PRIOR, 800) }))
+    const holders = (st.holders || []).filter((h) => h.games >= MIN && !isLux(h.id) && roleOk(t, h.id)).map((h) => ({ ...h, a: adj(h.avg, h.games, st.avg ?? PRIOR, 800) }))
       .sort((a, b) => a.a - b.a);
     const bestHolder = holders[0];
     // mốc mạnh nhất (đủ mẫu) của tộc/hệ
@@ -29,7 +36,7 @@ const adj = (avg, g, prior = PRIOR, k = K) => (avg == null || !g || g < MIN ? pr
     // trong đội gợi ý: tỉ lệ đội mà ấn lên mốc, và điểm đội tốt nhất
     let useful = 0, total = 0, topScore = 0;
     for (const L of [8, 9]) {
-      const res = await S.recommendAsync([t], L, 10);
+      const res = await S.recommendAsync([t], L, 10, null, UI_DEFAULTS);
       for (const c of res) { total++; if (c.emblems.some((x) => x.unit != null && x.lifts)) useful++; }
       topScore += res[0]?.total || 0;
     }
