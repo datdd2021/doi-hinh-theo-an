@@ -11,7 +11,7 @@ const S = createSolver(D, window.TFT_META);
 (async () => {
   const out = { updated: new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10) /* ngày theo giờ Việt Nam (UTC+7) */, levels: {} };
   for (const L of [8, 9, 10]) {
-    const r = await S.bestComps(L, 6);
+    const r = await S.bestComps(L, 6, null, { banned: [S.luxBase] }); // mặc định loại Lux (như giao diện)
     out.levels[L] = r.map((c) => ({ units: c.units.map((u) => D.units[u].id), total: +c.total.toFixed(2) }));
     console.log(`cấp ${L}: ${r.length} đội · tốt nhất ${r[0]?.total.toFixed(1)} · ${r[0]?.units.map((u) => D.units[u].name).join(', ')}`);
   }

@@ -145,18 +145,24 @@
 
     // ---------- Giá trị tướng (từ số liệu, chấm như mốc tộc/hệ; không cộng trừ theo giá) ----------
     // Chỉ tính các ván tướng ở 1–2 sao: chơi theo ấn thì không reroll, số liệu 3 sao làm tướng rẻ trông mạnh hơn thật.
-    const unitStat = (i) => {
+    // Tướng 5 vàng ở cấp ≤ 9: chỉ số liệu 1 sao (vừa lên cấp chưa có tiền roll; số liệu 2 sao thiên về người đang thắng,
+    // tỉ lệ lên 2 sao mỗi tướng lại khác nhau, vd Draven 1 sao 5,7 nhưng gộp 4,2). Cấp 10: gộp 1–2 sao.
+    const unitStat = (i, oneStar5) => {
       const s = meta.units?.[statId(i)];
-      const st = (s?.stars || []).filter((x) => x.n <= 2);
+      const maxStar = oneStar5 && U[i].cost === 5 ? 1 : 2;
+      const st = (s?.stars || []).filter((x) => x.n <= maxStar);
       if (!st.length) return { avg: s?.avg, games: s?.games };
       const games = st.reduce((a, x) => a + x.games, 0);
       return { avg: st.reduce((a, x) => a + x.games * x.avg, 0) / games, games };
     };
-    const unitVal = U.map((u, i) => {
-      const s = unitStat(i);
+    const unitValOf = (oneStar5) => U.map((u, i) => {
+      const s = unitStat(i, oneStar5);
       const data = UNIT_K * (PRIOR_AVG - adjAvg(s.avg, s.games));
       return data + activeBonus(data);
     });
+    const unitValMix = unitValOf(false), unitVal1 = unitValOf(true);
+    const ONE_STAR5_MAX_LEVEL = 9;
+    let unitVal = unitValMix; // đổi theo cấp trong setLevel
 
     // ---------- Ấn: ai cầm tốt nhất ----------
     // Ấn "chống chịu" nếu phần lớn tướng có tộc/hệ đó là tank, ấn "sát thương" nếu hầu như không.
@@ -206,6 +212,7 @@
     function setLevel(L) {
       if (L === currentLevel) return;
       currentLevel = L;
+      unitVal = L <= ONE_STAR5_MAX_LEVEL ? unitVal1 : unitValMix;
       const min = LEVEL_RULES[L].carryCost;
       isCarry = U.map((u) => (!u.tank && u.cost >= min ? 1 : 0));
     }
@@ -1332,8 +1339,10 @@
     // ---------- Đội mạnh nhất KHÔNG ấn ở cấp L ----------
     // Chỉ dùng số liệu tướng + tộc/hệ (bộ chấm điểm của app): không đội mẫu (TFT Academy / kiểu đội MetaTFT),
     // không điểm "giống kiểu đội thật". Tìm bằng beam rộng + mài đổi từng tướng + đổi cặp, đủ luật như gợi ý theo ấn.
-    async function bestComps(L, howMany = 6, onProgress) {
+    async function bestComps(L, howMany = 6, onProgress, opts = {}) {
       setLevel(L);
+      const banned = (opts.banned || []).map(toBase); // vd mặc định loại Lux
+      const ban = banMask(banned);
       const rules = LEVEL_RULES[L];
       const none = new Int8Array(NT);
       const cfg = { maxUnused: 3, maxUnique: null };
@@ -1342,6 +1351,7 @@
       const out = [];
       const add = (units) => {
         setLevel(L);
+        if (units.some((u) => ban[u])) return;
         if (units.reduce((a, u) => a + slotsOf[u], 0) !== L) return;
         if (units.filter((u) => tank[u]).length < rules.tank) return;
         if (units.filter((u) => !tank[u] && U[u].cost >= rules.carryCost).length < rules.carry) return;
@@ -1351,12 +1361,12 @@
         if (dup >= 0) { if (out[dup].total < total) out[dup] = { units, total }; return; }
         out.push({ units, total });
       };
-      const algo = await suggestAsync([], L, 16, onProgress, { beamScale: 1, maxBig: 6 });
+      const algo = await suggestAsync([], L, 16, onProgress, { beamScale: 1, maxBig: 6, banned });
       for (const c of algo) add(c.units);
       out.sort((a, b) => b.total - a.total);
-      for (const c of out.slice(0, POLISH_TOP)) { await tick(); add(keepScore(c.units, [], L, new Set(), {}, POLISH_SWAPS).units); }
+      for (const c of out.slice(0, POLISH_TOP)) { await tick(); add(keepScore(c.units, [], L, new Set(), { banned }, POLISH_SWAPS).units); }
       out.sort((a, b) => b.total - a.total);
-      for (const c of out.slice(0, PAIR_TOP)) { await tick(); add(pairPolish(c.units, [], L, new Set(), {})); }
+      for (const c of out.slice(0, PAIR_TOP)) { await tick(); add(pairPolish(c.units, [], L, new Set(), { banned })); }
       out.sort((a, b) => b.total - a.total);
       return out.slice(0, howMany);
     }

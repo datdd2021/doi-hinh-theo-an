@@ -26,7 +26,7 @@ for (const k of [2, 3, 4]) groups[k] = Array.from({ length: N }, () => Array.fro
       const best = [];
       let top = null;
       for (const tr of groups[k]) {
-        const r = await S.recommendAsync(tr, L, 10);
+        const r = await S.recommendAsync(tr, L, 10, null, { banned: [S.luxBase] }); // như mặc định giao diện: loại Lux
         const ok = r.filter((c) => !c.emblems.some((e) => e.unit == null || !e.lifts));
         for (const c of ok.length ? ok : r) if (!top || c.total > top.total) top = { total: +c.total.toFixed(2), emblems: tr.map((t) => D.traits[t].id), units: c.units.map((u) => D.units[u].id) };
         if (r.length) best.push(Math.max(...(ok.length ? ok : r).map((c) => c.total)));
